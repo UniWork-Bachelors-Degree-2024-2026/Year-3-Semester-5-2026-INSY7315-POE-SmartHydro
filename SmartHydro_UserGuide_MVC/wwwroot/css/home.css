@@ -1,0 +1,244 @@
+﻿.sh-hello {
+    background: var(--sh-sidebar-gradient);
+    border: 0;
+    color: #ffffff;
+}
+
+.sh-hello-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.sh-hello-text {
+    margin: 0.4rem 0 0;
+    max-width: 58ch;
+    color: var(--sh-sidebar-text);
+}
+
+.sh-helpers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.6rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--sh-sidebar-text);
+}
+
+    .sh-helpers > span {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .sh-helpers b {
+        color: #ffffff;
+    }
+
+.sh-card-head {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.sh-card-head-icon {
+    color: var(--sh-ink);
+    flex-shrink: 0;
+    padding-top: 0.1rem;
+}
+
+    .sh-card-head-icon .material-symbols-outlined {
+        font-size: 1.6rem;
+    }
+
+.sh-card-head-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+
+.sh-card-head-text {
+    margin: 0.15rem 0 0;
+    color: var(--sh-text-soft);
+}
+
+.sh-ways {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.8rem 0 0;
+    padding-left: 1.3rem;
+    color: var(--sh-text);
+}
+
+.sh-read-more {
+    margin: 0.8rem 0 0;
+}
+
+    .sh-read-more a {
+        color: var(--sh-ink);
+        font-weight: 600;
+    }
+
+.sh-sectitle {
+    margin: 0.6rem 0 -0.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sh-text-muted);
+}
+
+.sh-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.sh-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.1rem;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius-lg);
+    background: var(--sh-card-bg);
+    box-shadow: var(--sh-shadow);
+    color: var(--sh-text);
+    text-decoration: none;
+}
+
+    .sh-tile:hover {
+        border-color: var(--sh-mint-border);
+        background: var(--sh-mint);
+        color: var(--sh-text);
+    }
+
+    .sh-tile:focus-visible,
+    .sh-person:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 2px;
+    }
+
+    .sh-tile .material-symbols-outlined {
+        font-size: 1.9rem;
+        color: var(--sh-ink);
+    }
+
+    .sh-tile b {
+        font-size: 1rem;
+    }
+
+    .sh-tile small {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--sh-text-muted);
+    }
+
+.sh-tile-warn .material-symbols-outlined {
+    color: var(--al-alert);
+}
+
+.sh-people {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.sh-person {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius-lg);
+    background: var(--sh-card-bg);
+    box-shadow: var(--sh-shadow);
+    color: var(--sh-text);
+    text-decoration: none;
+}
+
+    .sh-person:hover {
+        border-color: var(--sh-mint-border);
+        background: var(--sh-mint);
+        color: var(--sh-text);
+    }
+
+    .sh-person b {
+        display: block;
+    }
+
+    .sh-person small {
+        display: block;
+        font-size: 0.85rem;
+        line-height: 1.35;
+        color: var(--sh-text-muted);
+    }
+
+.sh-person-icon {
+    color: var(--sh-ink);
+    flex-shrink: 0;
+}
+
+    .sh-person-icon .material-symbols-outlined {
+        font-size: 2rem;
+    }
+
+@media (max-width: 900px) {
+    .sh-tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .sh-tiles,
+    .sh-people {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sh-hello-title {
+        font-size: 1.35rem;
+    }
+}
+
+.sh-modes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.sh-mode {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--sh-mint-border);
+    border-radius: 12px;
+    background: var(--sh-mint);
+}
+
+    .sh-mode h4 {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--sh-ink);
+    }
+
+    .sh-mode p {
+        margin: 0 0 0.4rem;
+        color: var(--sh-text);
+    }
+
+    .sh-mode a {
+        color: var(--sh-ink);
+        font-weight: 600;
+    }
+
+@media (max-width: 640px) {
+    .sh-modes {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -1,0 +1,131 @@
+@model Group_1_SmartHydro_MVC.Models.ThresholdsPageViewModel
+
+@{
+    ViewData["Title"] = "Thresholds";
+
+    string Possessive(string name)
+    {
+        var trimmed = (name ?? "").Trim();
+
+        if (trimmed.EndsWith("s", StringComparison.OrdinalIgnoreCase))
+        {
+            return trimmed + "'";
+        }
+
+        return trimmed + "'s";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/thresholds.css" asp-append-version="true" />
+}
+
+<div class="sh-status-header">
+    <div>
+        <h2 class="sh-status-title">Thresholds</h2>
+        <span class="sh-status-subtitle">Set the safe range for each reading. You get an alert when a reading goes outside it.</span>
+    </div>
+</div>
+
+@if (TempData["ThresholdsMessage"] is string savedMessage)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>@savedMessage</span>
+    </div>
+}
+
+@if (Model.LoadFailed)
+{
+    <div class="sh-flash sh-thr-flash-error" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>The saved ranges could not be loaded. Refresh the page to try again.</span>
+    </div>
+}
+
+<p class="sh-thr-note">
+    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+    @if (!Model.HasSite)
+    {
+        <text>Choose a site to set the thresholds of its structures.</text>
+    }
+    else if (Model.Sections.Count == 0 && !Model.LoadFailed)
+    {
+        <text>This site has no structures yet. Add one to set its thresholds.</text>
+    }
+    else
+    {
+        <text>Each structure has its own safe ranges, starting on healthy defaults. Leave both boxes empty to keep a reading as it is.</text>
+    }
+</p>
+
+@foreach (var block in Model.Sections)
+{
+    var headingId = "sh-thr-" + block.Key + "-title";
+
+    <form class="sh-card sh-thr-card" method="post" asp-controller="Thresholds" asp-action="Save" aria-labelledby="@headingId">
+        <input type="hidden" name="StructureId" value="@block.Key" />
+
+        <div class="sh-thr-head">
+            <h3 class="sh-thr-title" id="@headingId">@block.Title</h3>
+            <span class="sh-thr-subtitle">@block.Subtitle</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(block.Message))
+        {
+            <div class="sh-flash sh-thr-flash-error" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                <span>@block.Message</span>
+            </div>
+        }
+
+        @for (var i = 0; i < block.Rows.Count; i++)
+        {
+            var row = block.Rows[i];
+            var rowClass = "sh-thr-row";
+            var minId = block.Key + "-" + row.Key + "-min";
+            var maxId = block.Key + "-" + row.Key + "-max";
+            var errorId = block.Key + "-" + row.Key + "-error";
+            string? invalid = null;
+            string? describedBy = null;
+
+            if (!string.IsNullOrWhiteSpace(row.Error))
+            {
+                rowClass += " has-error";
+                invalid = "true";
+                describedBy = errorId;
+            }
+
+            <div class="@rowClass" role="group" aria-label="@row.Label">
+                <input type="hidden" name="Rows[@i].Sensor" value="@row.Key" />
+
+                <div class="sh-thr-name">
+                    <span class="sh-thr-label">@row.Label</span>
+                    <span class="sh-thr-unit">@row.Unit</span>
+                </div>
+
+                <div class="sh-field sh-thr-field">
+                    <label class="sh-field-label" for="@minId">Minimum</label>
+                    <input class="sh-input" id="@minId" name="Rows[@i].Min" type="number" inputmode="decimal" step="any" min="@row.Lowest" max="@row.Highest" value="@row.Min" placeholder="Min" aria-label="@row.Label minimum" aria-invalid="@invalid" aria-describedby="@describedBy" />
+                </div>
+
+                <div class="sh-field sh-thr-field">
+                    <label class="sh-field-label" for="@maxId">Maximum</label>
+                    <input class="sh-input" id="@maxId" name="Rows[@i].Max" type="number" inputmode="decimal" step="any" min="@row.Lowest" max="@row.Highest" value="@row.Max" placeholder="Max" aria-label="@row.Label maximum" aria-invalid="@invalid" aria-describedby="@describedBy" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(row.Error))
+                {
+                    <span class="sh-field-error sh-thr-row-error" id="@errorId">@row.Error</span>
+                }
+            </div>
+        }
+
+        <div class="sh-thr-actions">
+            <button type="submit" class="sh-submit-btn sh-thr-submit">
+                <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                <span>Save @Possessive(block.Title) Thresholds</span>
+            </button>
+        </div>
+    </form>
+}

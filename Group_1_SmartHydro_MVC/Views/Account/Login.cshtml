@@ -1,0 +1,325 @@
+@model Group_1_SmartHydro_MVC.Models.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Sign In";
+
+    string? formError = null;
+    if (ViewData["OtpStep"] is not true && ViewData.ModelState.TryGetValue(string.Empty, out var formState))
+    {
+        formError = formState.Errors.Select(e => e.ErrorMessage).FirstOrDefault();
+    }
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Smart Hydro</title>
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/busy-submit.js" asp-append-version="true" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reader.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth-modals.css" asp-append-version="true" />
+</head>
+<body class="sh-auth-body" data-otp-step="@((ViewData["OtpStep"] is true).ToString().ToLowerInvariant())">
+    <main class="sh-auth-main">
+        <div class="sh-auth-center">
+            <div class="sh-auth-center-stack">
+                <div class="sh-card sh-auth-card">
+                    <button class="sh-theme-toggle sh-contrast-toggle sh-auth-theme-toggle sh-auth-contrast-toggle" type="button" id="sh-contrast-toggle" aria-pressed="false" aria-label="Turn on high contrast" title="Turn on high contrast">
+                        <span class="material-symbols-outlined" aria-hidden="true">contrast</span>
+                    </button>
+                    <button class="sh-theme-toggle sh-auth-theme-toggle" type="button" id="sh-theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                        <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-light" aria-hidden="true">light_mode</span>
+                        <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-dark" aria-hidden="true">dark_mode</span>
+                    </button>
+                    <partial name="_AuthReaderButtons" />
+
+                    <div class="sh-auth-header">
+                        <div class="sh-auth-icon-col">
+                            <span class="sh-auth-brand-icon">
+                                <img src="~/images/logo.png" alt="Smart Hydro logo" />
+                            </span>
+                            <span class="sh-auth-brand-name">Smart Hydro</span>
+                        </div>
+                        <div class="sh-auth-heading-col">
+                            <h1 class="sh-auth-heading">Welcome back</h1>
+                            <p class="sh-auth-subtext">Sign in to your Smart Hydro account to continue.</p>
+                        </div>
+                    </div>
+
+                    <form class="sh-auth-form" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        @if (formError != null)
+                        {
+                            <div class="sh-auth-alert" id="sh-auth-alert" role="alert">
+                                <span class="material-symbols-outlined sh-auth-alert-icon" aria-hidden="true">error</span>
+                                <span class="sh-auth-alert-text">@formError</span>
+                                <button type="button" class="sh-auth-alert-close" id="sh-auth-alert-close" aria-label="Dismiss">
+                                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                                </button>
+                            </div>
+                        }
+
+                        <div class="sh-field">
+                            <label class="sh-field-label" asp-for="EmailOrUsername">Email or username</label>
+                            <input asp-for="EmailOrUsername" class="sh-input" placeholder="you@smarthydro.com" autocomplete="username" />
+                            <span asp-validation-for="EmailOrUsername" class="text-danger"></span>
+                        </div>
+
+                        <div class="sh-field">
+                            <label class="sh-field-label" asp-for="Password">Password</label>
+                            <div class="sh-auth-password-wrap">
+                                <input asp-for="Password" type="password" class="sh-input" placeholder="Enter your password" autocomplete="current-password" />
+                                <button type="button" class="sh-auth-toggle-visibility" id="sh-password-toggle" aria-label="Show password">
+                                    <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <input asp-for="OtpCode" type="hidden" id="OtpCode" />
+                        @if (ViewData["OtpStep"] is true)
+                        {
+                            <p class="sh-auth-footer-note" role="status">@ViewData["OtpMessage"] <button type="button" class="sh-link-button" id="sh-otp-reopen" aria-haspopup="dialog" aria-controls="sh-otp-modal">Enter your code</button></p>
+                        }
+
+                        <div class="sh-auth-field-row">
+                            <label class="sh-auth-remember">
+                                <input asp-for="RememberMe" type="checkbox" />
+                                Remember me
+                            </label>
+                            <button type="button" class="sh-link-button sh-auth-link" id="sh-forgot-open" aria-haspopup="dialog" aria-controls="sh-forgot-modal">Forgot password?</button>
+                        </div>
+
+                        <button type="submit" class="sh-submit-btn sh-auth-submit">Sign In</button>
+                    </form>
+
+                    <div class="sh-auth-divider">or</div>
+                    <div class="sh-auth-footer-stack">
+                        <p class="sh-auth-footer-note">Don't have an account? <a asp-controller="Account" asp-action="Register">Create one</a></p>
+                        <p class="sh-auth-footer-note">Have an invite code? <a asp-controller="Account" asp-action="ClaimInviteCode">Join your team</a></p>
+                        <p class="sh-auth-footer-note sh-auth-footer-note--muted">Need help signing in? <a href="mailto:smarthydrosupport@gmail.com" id="sh-contact-admin-link" aria-haspopup="dialog" aria-controls="sh-contact-modal">Contact support</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sh-auth-page-foot">&copy; @DateTime.Now.Year Smart Hydro</div>
+    </main>
+
+    <div class="sh-modal" id="sh-otp-modal" role="dialog" aria-modal="true" aria-labelledby="sh-otp-title" aria-describedby="sh-otp-text" data-resend-url="@Url.Action("ResendOtp", "Account")" hidden>
+        <div class="sh-modal-backdrop" data-sh-modal-close></div>
+        <div class="sh-modal-panel">
+            <button type="button" class="sh-modal-close" data-sh-modal-close aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <span class="sh-modal-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">mark_email_read</span>
+            </span>
+            <h2 class="sh-modal-title" id="sh-otp-title">Check your email</h2>
+            <p class="sh-modal-text" id="sh-otp-text">
+                We sent a 6-digit code to
+                @if (!string.IsNullOrWhiteSpace(Model?.EmailOrUsername))
+                {
+                    <strong class="sh-modal-email">@Model.EmailOrUsername</strong>
+                }
+                else
+                {
+                    <strong class="sh-modal-email">your approved email address</strong>
+                }
+                Enter it below to finish signing in.
+            </p>
+
+            <div class="sh-otp-boxes" id="sh-otp-boxes" role="group" aria-label="One-time code">
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3" />
+                <span class="sh-otp-sep" aria-hidden="true"></span>
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 5" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 6" />
+            </div>
+
+            @if (ViewData["OtpStep"] is true && !ViewData.ModelState.IsValid)
+            {
+                <div class="sh-modal-error" role="alert">
+                    <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                    <span>Invalid or expired code. Please try again.</span>
+                </div>
+            }
+
+            <p class="sh-modal-hint">The code expires in 10 minutes.</p>
+
+            <p class="sh-modal-hint">
+                Didn't get a code?
+                <button type="button" class="sh-auth-link" id="sh-otp-resend" style="background:none;border:none;padding:0;font:inherit;cursor:pointer;">Resend code</button>
+            </p>
+            <p class="sh-modal-hint" id="sh-otp-resend-status" role="status" aria-live="polite"></p>
+
+            <div class="sh-modal-actions">
+                <button type="button" class="sh-modal-btn sh-modal-btn-secondary" data-sh-modal-close>Cancel</button>
+                <button type="button" class="sh-modal-btn sh-modal-btn-primary" id="sh-otp-verify" disabled>Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sh-modal" id="sh-forgot-modal" role="dialog" aria-modal="true" aria-labelledby="sh-forgot-title" aria-describedby="sh-forgot-text" data-request-url="@Url.Action("ForgotPassword", "Account")" hidden>
+        <div class="sh-modal-backdrop" data-sh-modal-close></div>
+        <div class="sh-modal-panel">
+            <button type="button" class="sh-modal-close" data-sh-modal-close aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <span class="sh-modal-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">lock_reset</span>
+            </span>
+            <h2 class="sh-modal-title" id="sh-forgot-title">Reset your password</h2>
+            <p class="sh-modal-text" id="sh-forgot-text">Enter your account email and we'll send you a reset code.</p>
+
+            <div class="sh-field">
+                <label class="sh-field-label" for="sh-forgot-email">Email</label>
+                <input class="sh-input" type="email" id="sh-forgot-email" placeholder="you@smarthydro.com" autocomplete="username" />
+            </div>
+            <p class="sh-field-error" id="sh-forgot-email-error"></p>
+
+            <div class="sh-modal-actions">
+                <button type="button" class="sh-modal-btn sh-modal-btn-secondary" data-sh-modal-close>Cancel</button>
+                <button type="button" class="sh-modal-btn sh-modal-btn-primary" id="sh-forgot-send">Send code</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sh-modal" id="sh-forgot-code-modal" role="dialog" aria-modal="true" aria-labelledby="sh-forgot-code-title" aria-describedby="sh-forgot-code-text" data-verify-url="@Url.Action("VerifyResetCode", "Account")" hidden>
+        <div class="sh-modal-backdrop" data-sh-modal-close></div>
+        <div class="sh-modal-panel">
+            <button type="button" class="sh-modal-close" data-sh-modal-close aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <span class="sh-modal-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">mark_email_read</span>
+            </span>
+            <h2 class="sh-modal-title" id="sh-forgot-code-title">Check your email</h2>
+            <p class="sh-modal-text" id="sh-forgot-code-text">
+                Enter the 6-digit reset code sent to
+                <strong class="sh-modal-email" id="sh-forgot-code-email">your email address</strong>
+            </p>
+
+            <p class="sh-forgot-sent-note" id="sh-forgot-sent-note"></p>
+
+            <div class="sh-otp-boxes" id="sh-forgot-otp-boxes" role="group" aria-label="Reset code">
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3" />
+                <span class="sh-otp-sep" aria-hidden="true"></span>
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 5" />
+                <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 6" />
+            </div>
+
+            <p class="sh-field-error" id="sh-forgot-code-error"></p>
+
+            <p class="sh-modal-hint">The code expires in 10 minutes.</p>
+
+            <p class="sh-modal-hint">
+                Didn't get a code?
+                <button type="button" class="sh-auth-link" id="sh-forgot-resend" style="background:none;border:none;padding:0;font:inherit;cursor:pointer;">Resend code</button>
+            </p>
+            <p class="sh-modal-hint" id="sh-forgot-code-status" role="status" aria-live="polite"></p>
+
+            <div class="sh-modal-actions">
+                <button type="button" class="sh-modal-btn sh-modal-btn-secondary" data-sh-modal-close>Cancel</button>
+                <button type="button" class="sh-modal-btn sh-modal-btn-primary" id="sh-forgot-code-verify" disabled>Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sh-modal" id="sh-forgot-password-modal" role="dialog" aria-modal="true" aria-labelledby="sh-forgot-password-title" aria-describedby="sh-forgot-password-text" data-reset-url="@Url.Action("ResetPassword", "Account")" hidden>
+        <div class="sh-modal-backdrop" data-sh-modal-close></div>
+        <div class="sh-modal-panel">
+            <button type="button" class="sh-modal-close" data-sh-modal-close aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <span class="sh-modal-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">password</span>
+            </span>
+            <h2 class="sh-modal-title" id="sh-forgot-password-title">Choose a new password</h2>
+            <p class="sh-modal-text" id="sh-forgot-password-text">Your code has been verified. Enter a new password for your account. You can't reuse any of your last 5 passwords.</p>
+
+            <div class="sh-modal-alert-slot" id="sh-forgot-reset-alert-slot" aria-live="assertive"></div>
+
+            <div class="sh-field">
+                <label class="sh-field-label" for="sh-forgot-new-password">New password</label>
+                <div class="sh-auth-password-wrap">
+                    <input class="sh-input" type="password" id="sh-forgot-new-password" placeholder="Enter a new password" autocomplete="new-password" maxlength="128" />
+                    <button type="button" class="sh-auth-toggle-visibility" id="sh-forgot-new-password-toggle" aria-label="Show password">
+                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sh-field">
+                <label class="sh-field-label" for="sh-forgot-confirm-password">Confirm new password</label>
+                <div class="sh-auth-password-wrap">
+                    <input class="sh-input" type="password" id="sh-forgot-confirm-password" placeholder="Re-enter the new password" autocomplete="new-password" maxlength="128" />
+                    <button type="button" class="sh-auth-toggle-visibility" id="sh-forgot-confirm-password-toggle" aria-label="Show password">
+                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                    </button>
+                </div>
+            </div>
+
+            <p class="sh-modal-hint sh-forgot-password-rule">At least 8 characters.</p>
+            <p class="sh-modal-hint" id="sh-forgot-password-status" role="status" aria-live="polite"></p>
+
+            <div class="sh-modal-actions">
+                <button type="button" class="sh-modal-btn sh-modal-btn-secondary" data-sh-modal-close>Cancel</button>
+                <button type="button" class="sh-modal-btn sh-modal-btn-primary" id="sh-forgot-reset-submit" disabled>Reset password</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sh-modal" id="sh-contact-modal" role="dialog" aria-modal="true" aria-labelledby="sh-contact-title" aria-describedby="sh-contact-text" hidden>
+        <div class="sh-modal-backdrop" data-sh-modal-close></div>
+        <div class="sh-modal-panel">
+            <button type="button" class="sh-modal-close" data-sh-modal-close aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <span class="sh-modal-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">support_agent</span>
+            </span>
+            <h2 class="sh-modal-title" id="sh-contact-title">Contact support</h2>
+            <p class="sh-modal-text" id="sh-contact-text">
+                Need access to a site or having trouble signing in? Email the Smart Hydro support team and we'll get you sorted.
+            </p>
+
+            <div class="sh-contact-card">
+                <span class="material-symbols-outlined sh-contact-card-icon" aria-hidden="true">mail</span>
+                <div class="sh-contact-card-body">
+                    <span class="sh-contact-card-label">Support email</span>
+                    <a class="sh-contact-card-email" id="sh-contact-email" href="mailto:smarthydrosupport@gmail.com">smarthydrosupport@gmail.com</a>
+                </div>
+                <button type="button" class="sh-contact-copy" id="sh-contact-copy" aria-label="Copy email address" title="Copy email address">
+                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+                </button>
+            </div>
+            <p class="sh-modal-hint sh-contact-copied" id="sh-contact-copied" aria-live="polite"></p>
+
+            <div class="sh-modal-actions">
+                <button type="button" class="sh-modal-btn sh-modal-btn-secondary" data-sh-modal-close>Close</button>
+                <a class="sh-modal-btn sh-modal-btn-primary" href="mailto:smarthydrosupport@gmail.com?subject=Smart%20Hydro%20access%20request">
+                    <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                    Send email
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/login.js" asp-append-version="true"></script>
+    <script src="~/js/reader.js" asp-append-version="true"></script>
+</body>
+</html>

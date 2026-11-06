@@ -1,0 +1,54 @@
+@model HelpPageViewModel
+
+<section class="sh-card">
+    <div class="sh-guide-intro">
+        <span class="sh-guide-intro-icon" aria-hidden="true">
+            <span class="material-symbols-outlined">@Model.Icon</span>
+        </span>
+        <div>
+            <h2 class="sh-guide-intro-title">@Model.Title</h2>
+            <p class="sh-guide-intro-text">@Html.Raw(Model.Intro)</p>
+        </div>
+    </div>
+
+    @if (Model.CanDo.Count > 0)
+    {
+        <div class="sh-cando">
+            <div class="sh-cando-yes">
+                <h3>You can</h3>
+                <ul>
+                    @foreach (var item in Model.CanDo)
+                    {
+                        <li><span class="material-symbols-outlined" aria-hidden="true">check</span>@item</li>
+                    }
+                </ul>
+            </div>
+
+            @if (Model.CannotDo.Count > 0)
+            {
+                <div class="sh-cando-no">
+                    <h3>You can't</h3>
+                    <ul>
+                        @foreach (var item in Model.CannotDo)
+                        {
+                            <li><span class="material-symbols-outlined" aria-hidden="true">close</span>@item</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.Tasks.Count > 3)
+    {
+        <nav class="sh-jump" aria-label="On this page">
+            <p class="sh-jump-title">On this page</p>
+            <ul>
+                @foreach (var task in Model.Tasks)
+                {
+                    <li><a href="#@task.Id">@task.Title</a></li>
+                }
+            </ul>
+        </nav>
+    }
+</section>

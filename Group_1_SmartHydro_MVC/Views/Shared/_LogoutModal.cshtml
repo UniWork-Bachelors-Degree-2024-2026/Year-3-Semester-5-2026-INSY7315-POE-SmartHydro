@@ -1,0 +1,20 @@
+﻿<div class="modal fade sh-clear-modal sh-logout-modal" id="sh-logout-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-logout-title" aria-describedby="sh-logout-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form method="post" asp-controller="Account" asp-action="Logout">
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">logout</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-logout-title">Log out?</h2>
+                    <p class="sh-clear-text" id="sh-logout-text">Are you sure you want to log out? You'll need to sign in again to use Smart Hydro.</p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm">Yes, log out</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,66 @@
+﻿/* RGBA Color Picker (2026) was used to generate the RGBA colour codes. */
+.sh-select-modal .modal-content {
+    border: 0;
+    border-radius: var(--sh-radius-lg);
+    box-shadow: 0 24px 60px rgba(31, 41, 55, 0.28);
+}
+
+.sh-select-modal-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sh-mint);
+    border: 1px solid var(--sh-mint-border);
+    color: var(--sh-structure-good);
+}
+
+    .sh-select-modal-icon .material-symbols-outlined {
+        font-size: 36px;
+    }
+
+.sh-select-modal-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--sh-text);
+}
+
+.sh-select-modal-text {
+    margin: 0 auto 1.6rem;
+    max-width: 22rem;
+    font-size: 0.95rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-select-modal-btn {
+    justify-content: center;
+    min-width: 12rem;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+    .sh-select-modal-btn:hover,
+    .sh-select-modal-btn:focus-visible {
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+.sh-select-modal.fade .modal-dialog {
+    transform: translateY(-18px) scale(0.97);
+    transition: transform 0.25s ease-out;
+}
+
+.sh-select-modal.show .modal-dialog {
+    transform: none;
+}
+
+/*
+    Reference List:
+    RGBA Color Picker, 2026. RGBA Color Picker. [online] Available at: <https://rgbacolorpicker.com/> [Accessed 22 September 2026]. 
+
+*/

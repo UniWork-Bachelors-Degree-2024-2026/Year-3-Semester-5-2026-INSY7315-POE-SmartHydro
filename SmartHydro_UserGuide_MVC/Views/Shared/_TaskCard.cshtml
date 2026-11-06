@@ -1,0 +1,126 @@
+@using Microsoft.AspNetCore.Html
+@model GuideTask
+@{
+    var siteRoot = Url.Content("~/");
+
+    // Turns the "~/" links written in the guide content into real links for wherever the site is hosted.
+    IHtmlContent Rich(string html)
+    {
+        return Html.Raw(html.Replace("href='~/", "href='" + siteRoot));
+    }
+}
+
+<article class="sh-card sh-task" id="@Model.Id">
+    <div class="sh-task-head">
+        <span class="sh-task-icon" aria-hidden="true">
+            <span class="material-symbols-outlined">@Model.Icon</span>
+        </span>
+        <div class="sh-task-heading">
+            <h3 class="sh-task-title">@Model.Title</h3>
+            @if (!string.IsNullOrEmpty(Model.Why))
+            {
+                <p class="sh-task-why">@Rich(Model.Why)</p>
+            }
+        </div>
+    </div>
+
+    @if (Model.Where != null)
+    {
+        <p class="sh-where">
+            <span class="material-symbols-outlined" aria-hidden="true">@Model.Where.Icon</span>
+            @Model.Where.Label
+        </p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ExtraHtml))
+    {
+        <div class="sh-task-extra">@Rich(Model.ExtraHtml)</div>
+    }
+
+    @if (Model.Table != null)
+    {
+        <div class="sh-table-scroll">
+            <table class="sh-table">
+                <thead>
+                    <tr>
+                        @foreach (var header in Model.Table.Headers)
+                        {
+                            <th scope="col">@header</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Table.Rows)
+                    {
+                        <tr>
+                            @foreach (var cell in row)
+                            {
+                                <td>@cell</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.Steps.Count > 0)
+    {
+        <ol class="sh-steps">
+            @foreach (var step in Model.Steps)
+            {
+                <li><div class="sh-step-text">@Rich(step)</div></li>
+            }
+        </ol>
+    }
+
+    @if (Model.ShowLights)
+    {
+        <div class="sh-lights">
+            <div class="sh-light sh-light-good"><b>Green</b><small>All good. Nothing to do.</small></div>
+            <div class="sh-light sh-light-caution"><b>Orange</b><small>Close to the edge. Keep an eye on it.</small></div>
+            <div class="sh-light sh-light-alert"><b>Red</b><small>Outside the healthy range. Act now.</small></div>
+        </div>
+    }
+
+    @if (Model.ShowHotspotFinder)
+    {
+        <div class="sh-tool" data-hotspot-finder>
+            <h4 class="sh-tool-title">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                Find your box's Wi-Fi name
+            </h4>
+            <p class="sh-tool-hint">Type the code from the sticker on your box.</p>
+            <label class="sh-tool-label" for="sh-mac">Code on the box (MAC address)</label>
+            <input class="sh-tool-input sh-mono" id="sh-mac" type="text" value="A4:CF:12:9B:3E:01" spellcheck="false" autocomplete="off" />
+            <label class="sh-tool-label" for="sh-box-type">Type of box</label>
+            <select class="sh-tool-input" id="sh-box-type">
+                <option value="Setup">Tower</option>
+                <option value="Fodder">Fodder trays</option>
+            </select>
+            <div class="sh-tool-result" aria-live="polite">
+                <div><small>Wi-Fi name</small><b class="sh-mono" id="sh-ssid">...</b></div>
+                <div><small>Password</small><b class="sh-mono">None</b></div>
+            </div>
+            <p class="sh-tool-error" id="sh-mac-error" hidden>That code doesn't look right. It has 12 letters and numbers, like A4:CF:12:9B:3E:01.</p>
+        </div>
+    }
+
+    @foreach (var note in Model.Notes)
+    {
+        <div class="@note.GetCssClass()">
+            <span class="material-symbols-outlined" aria-hidden="true">@note.GetIcon()</span>
+            <div>@Rich(note.Html)</div>
+        </div>
+    }
+
+    @if (Model.HasWalkthrough())
+    {
+        <div class="sh-task-actions">
+            <button class="sh-btn sh-btn-primary" type="button" data-walkthrough>
+                <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+                Show me one step at a time
+            </button>
+        </div>
+    }
+</article>

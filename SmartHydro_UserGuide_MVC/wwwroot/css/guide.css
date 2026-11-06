@@ -1,0 +1,561 @@
+.sh-mono {
+    font-family: ui-monospace, Consolas, "Cascadia Mono", monospace;
+}
+
+.sh-guide-stack .ui {
+    font-weight: 700;
+    color: var(--sh-ink);
+}
+
+.sh-guide-stack a {
+    color: var(--sh-ink);
+    font-weight: 600;
+}
+
+.sh-cando {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.1rem;
+}
+
+    .sh-cando h3 {
+        margin: 0 0 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sh-text-muted);
+    }
+
+    .sh-cando ul {
+        display: grid;
+        gap: 0.3rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--sh-text);
+    }
+
+    .sh-cando li {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+.sh-cando-yes .material-symbols-outlined {
+    color: var(--al-resolved);
+}
+
+.sh-cando-no .material-symbols-outlined {
+    color: var(--al-alert-text);
+}
+
+.sh-jump {
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sh-border);
+}
+
+.sh-jump-title {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sh-text-muted);
+}
+
+.sh-jump ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    columns: 3 14rem;
+    column-gap: 1.5rem;
+}
+
+.sh-jump li {
+    break-inside: avoid;
+    padding: 0.2rem 0;
+}
+
+.sh-guide-stack .sh-jump a {
+    text-decoration: none;
+}
+
+    .sh-guide-stack .sh-jump a:hover {
+        text-decoration: underline;
+    }
+
+.sh-task {
+    scroll-margin-top: 5.5rem;
+    color: var(--sh-text);
+}
+
+.sh-task-head {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.sh-task-icon {
+    color: var(--sh-ink);
+    flex-shrink: 0;
+    padding-top: 0.1rem;
+}
+
+    .sh-task-icon .material-symbols-outlined {
+        font-size: 1.6rem;
+    }
+
+.sh-task-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.sh-task-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+
+.sh-task-why {
+    margin: 0.15rem 0 0;
+    color: var(--sh-text-soft);
+}
+
+.sh-where {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.88rem;
+    color: var(--sh-text-muted);
+}
+
+    .sh-where .material-symbols-outlined {
+        font-size: 1.1rem;
+    }
+
+.sh-task-extra {
+    margin-top: 0.8rem;
+}
+
+.sh-ways {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding-left: 1.3rem;
+}
+
+.sh-task-para {
+    margin: 1rem 0 0;
+}
+
+.sh-task-subhead {
+    margin: 1.2rem 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+
+    .sh-task-subhead:first-child {
+        margin-top: 0;
+    }
+
+.sh-table-scroll {
+    margin-top: 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--sh-border);
+    border-radius: 12px;
+}
+
+.sh-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    color: var(--sh-text);
+}
+
+    .sh-table th,
+    .sh-table td {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--sh-border);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .sh-table th {
+        background: var(--sh-surface-alt);
+        font-size: 0.78rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--sh-text-muted);
+    }
+
+    .sh-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+.sh-steps {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: sh-step;
+    border-top: 1px solid var(--sh-border);
+}
+
+    .sh-steps > li {
+        counter-increment: sh-step;
+        display: grid;
+        grid-template-columns: 2.4rem minmax(0, 1fr);
+        gap: 0.5rem;
+        align-items: baseline;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--sh-border);
+    }
+
+        .sh-steps > li::before {
+            content: counter(sh-step) ".";
+            color: var(--sh-ink);
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+.sh-step-text {
+    margin: 0;
+}
+
+.sh-step-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1.3rem;
+    list-style: disc;
+}
+
+    .sh-step-list li + li {
+        margin-top: 0.3rem;
+    }
+
+.sh-lights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.sh-light {
+    padding: 0.8rem;
+    border: 1px solid var(--sh-border);
+    border-top: 5px solid var(--sh-light-colour);
+    border-radius: 12px;
+    background: var(--sh-surface-alt);
+}
+
+    .sh-light b {
+        display: block;
+        color: var(--sh-light-colour);
+    }
+
+    .sh-light small {
+        font-size: 0.88rem;
+        color: var(--sh-text-soft);
+    }
+
+.sh-light-good {
+    --sh-light-colour: var(--al-resolved);
+}
+
+.sh-light-caution {
+    --sh-light-colour: var(--al-caution-text);
+}
+
+.sh-light-alert {
+    --sh-light-colour: var(--al-alert);
+}
+
+.sh-note {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-left: 4px solid var(--sh-water);
+    border-radius: 0 10px 10px 0;
+    background: var(--sh-mint);
+    font-size: 0.95rem;
+}
+
+    .sh-note > .material-symbols-outlined {
+        color: var(--sh-water);
+    }
+
+.sh-note-warn {
+    border-left-color: var(--al-caution);
+    background: var(--al-caution-soft);
+}
+
+    .sh-note-warn > .material-symbols-outlined {
+        color: var(--al-caution-text);
+    }
+
+.sh-note-stop {
+    border-left-color: var(--al-alert);
+    background: var(--al-alert-soft);
+}
+
+    .sh-note-stop > .material-symbols-outlined {
+        color: var(--al-alert-text);
+    }
+
+.sh-note-good {
+    border-left-color: var(--al-resolved);
+    background: var(--al-resolved-soft);
+}
+
+    .sh-note-good > .material-symbols-outlined {
+        color: var(--al-resolved);
+    }
+
+.sh-task-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.sh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.8rem;
+    padding: 0 1.1rem;
+    border: 1px solid var(--sh-border-strong);
+    border-radius: 10px;
+    background: var(--sh-card-bg);
+    color: var(--sh-text);
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .sh-btn:hover {
+        background: var(--sh-mint);
+    }
+
+    .sh-btn:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 2px;
+    }
+
+    .sh-btn:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+
+.sh-btn-primary {
+    border-color: var(--sh-ink-fill);
+    background: var(--sh-ink-fill);
+    color: var(--sh-on-accent);
+}
+
+    .sh-btn-primary:hover {
+        border-color: var(--sh-ink-fill-hover);
+        background: var(--sh-ink-fill-hover);
+    }
+
+.sh-tool {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--sh-mint-border);
+    border-radius: 12px;
+    background: var(--sh-mint);
+}
+
+.sh-tool-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--sh-ink);
+}
+
+.sh-tool-hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--sh-text-soft);
+}
+
+.sh-tool-label {
+    display: block;
+    margin: 0.5rem 0 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sh-tool-input {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--sh-input-border);
+    border-radius: 10px;
+    background: var(--sh-card-bg);
+    color: var(--sh-text);
+    font: inherit;
+}
+
+    .sh-tool-input:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 1px;
+    }
+
+.sh-tool-result {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+}
+
+    .sh-tool-result > div {
+        padding: 0.6rem 0.8rem;
+        border: 1px solid var(--sh-border);
+        border-radius: 10px;
+        background: var(--sh-card-bg);
+    }
+
+    .sh-tool-result small {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--sh-text-muted);
+    }
+
+    .sh-tool-result b {
+        font-size: 1.05rem;
+        overflow-wrap: anywhere;
+    }
+
+.sh-tool-error {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--al-alert-text);
+}
+
+.sh-walk-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: var(--sh-overlay);
+}
+
+    .sh-walk-overlay[hidden] {
+        display: none;
+    }
+
+.sh-walk {
+    width: min(560px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 1.5rem;
+    border-radius: 14px;
+    background: var(--sh-card-bg);
+    color: var(--sh-text);
+    box-shadow: 0 20px 60px var(--sh-modal-shadow);
+}
+
+.sh-walk-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sh-walk-count {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--sh-text-muted);
+}
+
+.sh-walk-bar {
+    height: 6px;
+    margin: 0.8rem 0 1.2rem;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--sh-surface-muted);
+}
+
+    .sh-walk-bar i {
+        display: block;
+        height: 100%;
+        background: var(--sh-accent);
+        transition: width 0.25s;
+    }
+
+.sh-walk-num {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--sh-ink);
+}
+
+.sh-walk-title {
+    margin: 0.8rem 0 0.3rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sh-text-muted);
+}
+
+.sh-walk-text {
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1.5;
+}
+
+    .sh-walk-text .ui {
+        font-weight: 700;
+        color: var(--sh-ink);
+    }
+
+    .sh-walk-text a {
+        color: var(--sh-ink);
+    }
+
+.sh-walk-nav {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+}
+
+    .sh-walk-nav .sh-btn {
+        flex: 1;
+        min-height: 3.4rem;
+        font-size: 1.05rem;
+    }
+
+body.sh-walk-open {
+    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .sh-cando,
+    .sh-tool-result {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .sh-lights {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sh-walk-bar i {
+        transition: none;
+    }
+}

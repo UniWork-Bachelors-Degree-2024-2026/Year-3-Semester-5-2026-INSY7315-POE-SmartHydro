@@ -1,0 +1,491 @@
+@model Group_1_SmartHydro_MVC.Models.SensorDetailViewModel
+
+@{
+    var structureId = Model.StructureId;
+
+    var syncLabel = Model.LastSyncLabel;
+    if (string.IsNullOrWhiteSpace(syncLabel))
+    {
+        syncLabel = "Not synced yet";
+    }
+
+    var isStatusHero = Model.HeroKind == SensorHeroKind.Status;
+
+    var heroTitle = Model.HeroTitle;
+    if (string.IsNullOrWhiteSpace(heroTitle))
+    {
+        heroTitle = Model.SensorName;
+    }
+
+    var heroDetailText = Model.HeroDetail;
+    var heroDetailClass = "sh-hero-status-value";
+    if (string.IsNullOrWhiteSpace(heroDetailText))
+    {
+        heroDetailText = "No data yet";
+        heroDetailClass = "sh-hero-status-value sh-hero-empty";
+    }
+
+    var hasHeroValue = !string.IsNullOrWhiteSpace(Model.HeroValue);
+    var heroValueText = "No data yet";
+    var heroValueClass = "sh-hero-value sh-hero-empty";
+    if (hasHeroValue)
+    {
+        heroValueText = Model.HeroValue;
+        heroValueClass = "sh-hero-value";
+    }
+
+    var optimalText = "Ideal range not set";
+    if (!string.IsNullOrWhiteSpace(Model.OptimalRange))
+    {
+        optimalText = "Ideal range: " + Model.OptimalRange;
+    }
+
+    var showHeroMeta = !string.IsNullOrWhiteSpace(Model.StatusText) || Model.HeroActions.Count > 0;
+
+    string? doseUrl = null;
+    string? doseStatusUrl = null;
+    string? doseStructureId = null;
+    string? dosePending = null;
+    if (Model.ShowDosing)
+    {
+        doseUrl = Url.Action("Dose", "Controls");
+        doseStatusUrl = Url.Action("DoseStatus", "Controls");
+        doseStructureId = structureId;
+        if (Model.DoseHasPending)
+        {
+            dosePending = "true";
+        }
+    }
+
+    var trendUnit = "";
+    if (!string.IsNullOrWhiteSpace(Model.HeroUnit))
+    {
+        trendUnit = " " + Model.HeroUnit;
+    }
+
+    // Rolling 7-day window ending today in South Africa Standard Time (SAST)
+    var trendLabels = new List<string>();
+    var trendValues = new List<double?>();
+    var trendRange = Model.TrendRangeLabel;
+
+    var valuesByDay = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+    for (var i = 0; i < Model.TrendValues.Count && i < Model.TrendLabels.Count; i++)
+    {
+        valuesByDay[Model.TrendLabels[i]] = Model.TrendValues[i];
+    }
+
+    var today = Group_1_SmartHydro_MVC.Services.SouthAfricaTime.ToSast(DateTime.UtcNow).Date;
+    var startDay = today.AddDays(-6);
+
+    for (var offset = 0; offset < 7; offset++)
+    {
+        var day = startDay.AddDays(offset);
+        var dayName = day.ToString("ddd", System.Globalization.CultureInfo.InvariantCulture);
+        trendLabels.Add(dayName);
+
+        if (valuesByDay.TryGetValue(dayName, out var dayValue))
+        {
+            trendValues.Add(dayValue);
+        }
+        else
+        {
+            trendValues.Add(null);
+        }
+    }
+
+    var weekdayNames = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+    var labelsAreWeekdays = Model.TrendLabels.Count == 0 || Model.TrendLabels.All(l => weekdayNames.Contains(l, StringComparer.OrdinalIgnoreCase));
+
+    if (labelsAreWeekdays)
+    {
+        trendRange = startDay.ToString("d MMM", System.Globalization.CultureInfo.InvariantCulture)
+                   + " - "
+                   + today.ToString("d MMM", System.Globalization.CultureInfo.InvariantCulture);
+
+        if (!trendValues[6].HasValue && hasHeroValue &&
+            double.TryParse(Model.HeroValue, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var liveHeroNum))
+        {
+            trendValues[6] = liveHeroNum;
+        }
+    }
+    else
+    {
+        trendLabels = Model.TrendLabels.ToList();
+        trendValues = Model.TrendValues.Select(v => (double?)v).ToList();
+    }
+
+    var hasTrend = trendValues.Any(v => v.HasValue);
+
+    // One spoken summary of the chart, so a screen reader doesn't read out a list of bare numbers
+    var trendSummary = "No history yet";
+    if (hasTrend)
+    {
+        var days = new List<string>();
+        for (var i = 0; i < trendValues.Count; i++)
+        {
+            var spokenValue = "no readings";
+            if (trendValues[i].HasValue)
+            {
+                spokenValue = trendValues[i]!.Value.ToString("0.#") + trendUnit;
+            }
+            days.Add(trendLabels[i] + " " + spokenValue);
+        }
+        trendSummary = Model.SensorName + ", 7-day trend: " + string.Join(", ", days);
+    }
+
+    var controlLabel = Model.ControlLabel;
+    if (string.IsNullOrWhiteSpace(controlLabel))
+    {
+        controlLabel = "Manual Override";
+    }
+
+    var controlCaption = Model.ControlCaption;
+    if (string.IsNullOrWhiteSpace(controlCaption))
+    {
+        controlCaption = "Not connected";
+    }
+
+    string? disabledAttribute = null;
+    if (!Model.CanControl)
+    {
+        disabledAttribute = "disabled";
+    }
+
+    string? checkedAttribute = null;
+    var controlDotClass = "sh-control-dot off";
+    if (Model.ControlOn)
+    {
+        checkedAttribute = "checked";
+        controlDotClass = "sh-control-dot on";
+    }
+}
+
+<div class="sh-detail-header">
+    <div>
+        <h2 class="sh-detail-title">@Model.SensorName</h2>
+        <span class="sh-detail-sync" id="sh-detail-sync-label">Last sync: @syncLabel</span>
+    </div>
+    <a class="sh-back-btn-solid" asp-controller="Dashboard" asp-action="Index" asp-route-id="@structureId">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        Back
+    </a>
+</div>
+
+@if (Model.ShowDosing)
+{
+    <div class="sh-dose-banner" id="sh-dose-banner" role="status" aria-live="polite">
+        <span class="material-symbols-outlined sh-dose-banner-icon" aria-hidden="true">check_circle</span>
+        <span class="sh-dose-banner-text"></span>
+        <button type="button" class="sh-dose-banner-close" aria-label="Close message">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+    </div>
+}
+
+<partial name="_ConnectivityStatus" model='Url.Action("ModeState", "Controls", new { structureId })' />
+
+<div class="sh-detail-layout" data-sensor-action="@(ViewContext.RouteData.Values["action"]?.ToString() ?? "")" data-structure-id="@structureId" data-device-mac="@Model.MacAddress">
+    <div class="sh-detail-left">
+        <div class="sh-card sh-hero-card">
+            <span class="sh-hero-icon-tile sh-icon-stack @Model.IconColorClass">
+                @if (Model.IconIsMaterialSymbol)
+                {
+                    <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@Model.IconName</span>
+                }
+                else
+                {
+                    <i class="@Model.IconName" aria-hidden="true"></i>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.IconText))
+                {
+                    <span class="sh-icon-stack-text sh-icon-stack-text-lg" aria-hidden="true">@Model.IconText</span>
+                }
+            </span>
+
+            <div class="sh-hero-text" data-structure-id="@doseStructureId" data-dose-url="@doseUrl" data-dose-status-url="@doseStatusUrl" data-dose-pending="@dosePending"
+                 data-ph-override-allowed="@Model.ManualPhOverrideAllowed.ToString().ToLowerInvariant()"
+                 data-ph-fault="@Model.ManualPhOverrideRequired.ToString().ToLowerInvariant()">
+                @if (isStatusHero)
+                {
+                    <span class="sh-hero-title">@heroTitle</span>
+                    if (!string.IsNullOrWhiteSpace(Model.HeroLead))
+                    {
+                        <span class="sh-hero-status-label">@Model.HeroLead</span>
+                    }
+                    <span class="@heroDetailClass">@heroDetailText</span>
+                    if (!string.IsNullOrWhiteSpace(Model.ScheduleText))
+                    {
+                        <div class="sh-hero-meta">
+                            <span class="sh-status-pill good">@Model.ScheduleText</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <span class="sh-hero-title sh-hero-title-reading">@heroTitle</span>
+
+                    <span class="@heroValueClass" data-ph-reading-metadata="@(Model.ControlKey == "ph" ? "true" : null)"
+                          data-ph-recorded-at="@Model.PhDisplayFallback?.RecordedAt.ToString("O")" data-ph-age-seconds="@Model.PhDisplayFallback?.AgeSeconds"
+                          title="@(Model.ControlKey == "ph" ? Model.PhReadingLabel : null)"
+                          aria-description="@(Model.ControlKey == "ph" ? Model.PhReadingLabel : null)">
+                        @heroValueText
+                        @if (hasHeroValue && !string.IsNullOrWhiteSpace(Model.HeroUnit))
+                        {
+                            <span class="sh-hero-unit">@Model.HeroUnit</span>
+                        }
+                    </span>
+
+                    if (!string.IsNullOrWhiteSpace(Model.HeroSubtitle))
+                    {
+                        <span class="sh-hero-subtitle">@Model.HeroSubtitle</span>
+                    }
+
+                    // The range is shown on its own line, under the subtitle when the page has one
+                    if (Model.ShowOptimalRange)
+                    {
+                        <span class="sh-hero-subtitle">@optimalText</span>
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(Model.HeroCaption))
+                    {
+                        <span class="sh-hero-caption">@Model.HeroCaption</span>
+                    }
+                    if (!string.IsNullOrWhiteSpace(Model.MeasurementNotice))
+                    {
+                        <p class="sh-measurement-notice" role="note">@Model.MeasurementNotice</p>
+                    }
+
+                    if (showHeroMeta)
+                    {
+                        if (!string.IsNullOrWhiteSpace(Model.StatusText))
+                        {
+                            <div class="sh-hero-meta">
+                                <span class="sh-status-pill @Model.StatusLevel">@Model.StatusText</span>
+                            </div>
+                        }
+
+                        if (Model.HeroActions.Count > 0)
+                        {
+                            <div class="sh-hero-meta sh-dose-actions" role="group" aria-label="Dose options">
+                                @foreach (var action in Model.HeroActions)
+                                {
+                                    var actionClass = "sh-hero-action";
+                                    if (action.Filled)
+                                    {
+                                        actionClass = "sh-hero-action filled";
+                                    }
+
+                                    string? actionDoseType = null;
+                                    string? actionDisabled = null;
+                                    if (!string.IsNullOrWhiteSpace(action.DoseType))
+                                    {
+                                        actionClass += " sh-dose-btn";
+                                        actionDoseType = action.DoseType;
+                                        if (!Model.CanControl || Model.DoseHasPending)
+                                        {
+                                            actionDisabled = "disabled";
+                                        }
+                                    }
+
+                                    var doseOption = Group_1_SmartHydro_MVC.Services.DosingCatalog.Find(action.DoseType);
+                                    var doseVolume = doseOption == null ? "" : "about " + doseOption.VolumeMl.ToString("0.##") + " mL";
+                                    var doseTitle = doseOption == null ? action.Label : action.Label + " (" + doseVolume + ")";
+                                    if (doseOption != null)
+                                    {
+                                        actionClass += " sh-dose-direction";
+                                    }
+
+                                    <button type="button" class="@actionClass" aria-label="@doseTitle" title="@doseTitle" data-dose-type="@actionDoseType" disabled="@actionDisabled">
+                                        @if (doseOption != null)
+                                        {
+                                            <span class="sh-dose-symbol" aria-hidden="true">@(action.DoseType.EndsWith("UP") ? "+" : "\u2212")</span>
+                                            <span class="sh-dose-text">
+                                                <strong>@action.Label</strong>
+                                                <small>@doseVolume</small>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="material-symbols-outlined" aria-hidden="true">@action.Icon</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+
+                    if (Model.ShowDosing)
+                    {
+                        <div class="sh-dose-status">
+                            <p class="sh-dose-explanation">@(Model.ControlKey == "ph" ? "Each tap sends one fixed dose. Wait 15 minutes for it to mix before adding more." : "Each tap sends one fixed dose. Wait 10 minutes for it to mix before adding more.")</p>
+                            <dl class="sh-dose-rows">
+                                <div class="sh-dose-row">
+                                    <dt>Waiting</dt>
+                                    <dd class="sh-dose-pending">@Model.DosePendingText</dd>
+                                </div>
+                                <div class="sh-dose-row">
+                                    <dt>Last dose</dt>
+                                    <dd class="sh-dose-last">@Model.DoseLastText</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        @if (Model.StatTiles.Count > 0)
+        {
+            <div class="sh-card sh-tile-card">
+                <div class="sh-tile-grid">
+                    @foreach (var tile in Model.StatTiles)
+                    {
+                        var hasTileValue = !string.IsNullOrWhiteSpace(tile.Value);
+                        var tileValueText = "No data yet";
+                        var tileValueClass = "sh-stat-tile-value sh-hero-empty";
+                        if (hasTileValue)
+                        {
+                            tileValueText = tile.Value;
+                            tileValueClass = "sh-stat-tile-value";
+                        }
+
+                        <div class="sh-stat-tile">
+                            <div>
+                                <span class="sh-stat-tile-label">@tile.Label</span>
+                                <div class="@tileValueClass">
+                                    @tileValueText
+                                    @if (hasTileValue && !string.IsNullOrWhiteSpace(tile.Unit))
+                                    {
+                                        <span class="sh-stat-tile-unit">@tile.Unit</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="sh-stat-tile-foot">
+                                @if (!string.IsNullOrWhiteSpace(tile.PillText))
+                                {
+                                    <span class="sh-status-pill @tile.PillLevel">@tile.PillText</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.ShowTrend && !isStatusHero)
+        {
+            var trendClass = "sh-card sh-trend-card " + Model.IconColorClass;
+
+            <div class="@trendClass">
+                <span class="sh-stat-value" role="heading" aria-level="3">7-Day Trend</span>
+
+                <div class="sh-trend-plot" id="sh-trend-plot-wrap" style="@(hasTrend ? "" : "display:none;")">
+                    <div class="sh-trend-chart">
+                        <canvas id="sh-trend-canvas" role="img" aria-label="@trendSummary"
+                                data-labels="@(Json.Serialize(trendLabels).ToString())"
+                                data-values="@(Json.Serialize(trendValues).ToString())"
+                                data-unit="@Model.HeroUnit"></canvas>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(trendRange))
+                {
+                    <span class="sh-trend-range-dates" id="sh-trend-range-label" style="@(hasTrend ? "" : "display:none;")">@trendRange</span>
+                }
+
+                <div class="sh-trend-plot sh-trend-empty" id="sh-trend-empty-state" style="@(hasTrend ? "display:none;" : "")">
+                    <span class="sh-trend-empty-title">No history yet</span>
+                    <span class="sh-trend-empty-sub">Daily readings will show here once the sensor reports.</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="sh-detail-right">
+        <div class="sh-card sh-control-card" data-structure-id="@structureId" data-control-url="@Url.Action("Set", "Controls")">
+            @Html.AntiForgeryToken()
+            <div class="sh-control-card-header">
+                <span class="sh-stat-value">@controlLabel</span>
+                @if (Model.ShowDosing)
+                {
+                    <span class="sh-pump-state" data-pump-state>@(Model.ControlOn ? "Reported running" : "Reported stopped")</span>
+                    <button type="button" class="sh-control-input sh-stop-dose" data-stop-dose data-reported-on="@Model.ControlOn.ToString().ToLowerInvariant()" data-control-key="@Model.ControlKey" disabled="@disabledAttribute" aria-label="Stop @controlLabel">Stop pumps</button>
+                }
+                else
+                {
+                <label class="sh-toggle sh-toggle-lg">
+                    <input type="checkbox" role="switch" aria-label="@controlLabel" class="sh-control-input" data-control-key="@Model.ControlKey" checked="@checkedAttribute" disabled="@disabledAttribute" />
+                    <span class="sh-slider"></span>
+                </label>
+                }
+            </div>
+            <div class="sh-control-card-caption">
+                <span class="@controlDotClass" aria-hidden="true"></span>
+                <span>@controlCaption</span>
+                @if (!string.IsNullOrWhiteSpace(Model.ControlHint))
+                {
+                    <span class="sh-control-hint">@Model.ControlHint</span>
+                }
+            </div>
+        </div>
+
+        <div class="sh-card sh-activity-card">
+            <span class="sh-stat-value" role="heading" aria-level="3">Activity Log</span>
+
+            @if (Model.ActivityLog.Count > 0)
+            {
+                <ul class="sh-activity-log sh-activity-log-detailed">
+                    @foreach (var entry in Model.ActivityLog)
+                    {
+                        var titleClass = "sh-activity-title";
+                        if (entry.IsWarning)
+                        {
+                            titleClass = "sh-activity-title warning";
+                        }
+
+                        <li class="sh-activity-item-detailed">
+                            <div class="sh-activity-item-row">
+                                <span class="@titleClass">
+                                    @if (entry.IsWarning)
+                                    {
+                                        <span class="visually-hidden">Warning: </span>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(entry.Source))
+                                    {
+                                        <span class="sh-source-badge">@entry.Source</span>
+                                    }
+                                    @entry.Title
+                                </span>
+                                <span class="sh-activity-time">@entry.Time</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(entry.Summary))
+                            {
+                                <p class="sh-activity-summary">@entry.Summary</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(entry.Description))
+                            {
+                                <details class="sh-calculation-details"><summary>Technical details</summary>
+                                    <p>Extra detail, useful for troubleshooting.</p>
+                                    @foreach (var paragraph in Group_1_SmartHydro_MVC.Services.SensorActivityText.DescriptionParagraphs(entry.Description))
+                                    {
+                                        <p class="sh-activity-description">@paragraph</p>
+                                    }
+                                </details>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="sh-empty-state">No activity recorded yet.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.ShowTrend && !isStatusHero)
+{
+    <script src="~/lib/chartjs/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="~/js/sensor-trend.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,131 @@
+@using Microsoft.AspNetCore.Html
+@model HelpPageViewModel
+@{
+    var siteRoot = Url.Content("~/");
+
+    // Turns the "~/" links written in the guide content into real links for wherever the site is hosted.
+    IHtmlContent Rich(string html)
+    {
+        return Html.Raw(html.Replace("href='~/", "href='" + siteRoot));
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/guide.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/words.css" asp-append-version="true" />
+}
+
+<div class="sh-guide-stack">
+    <section class="sh-card" aria-labelledby="sh-words-title">
+        <div class="sh-guide-intro">
+            <span class="sh-guide-intro-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">@Model.Icon</span>
+            </span>
+            <div>
+                <h2 class="sh-guide-intro-title" id="sh-words-title">@Model.Title</h2>
+                <p class="sh-guide-intro-text">@Html.Raw(Model.Intro)</p>
+            </div>
+        </div>
+
+        <div class="sh-words-find" data-word-finder hidden>
+            <label class="sh-jump-title" for="sh-word-search">Find a word</label>
+            <div class="sh-words-search">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input id="sh-word-search" type="search" placeholder="Type a word, like pH, gateway or offline" autocomplete="off" />
+            </div>
+            <p class="sh-words-none" id="sh-words-none" aria-live="polite" hidden>No words match that. Try a shorter word, or pick a group below.</p>
+        </div>
+
+        <nav class="sh-jump" aria-label="On this page">
+            <p class="sh-jump-title">On this page</p>
+            <ul>
+                @foreach (var group in Model.TermGroups)
+                {
+                    <li><a href="#@group.Id">@group.Title</a></li>
+                }
+                <li><a href="#sh-easier">Make Smart Hydro easier to use</a></li>
+            </ul>
+        </nav>
+    </section>
+
+    @foreach (var group in Model.TermGroups)
+    {
+        <section class="sh-card sh-words-group" id="@group.Id" aria-labelledby="@(group.Id)-title" data-word-group>
+            <div class="sh-task-head">
+                <span class="sh-task-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">@group.Icon</span>
+                </span>
+                <div class="sh-task-heading">
+                    <h3 class="sh-task-title" id="@(group.Id)-title">@group.Title</h3>
+                    <p class="sh-task-why">@group.Intro</p>
+                </div>
+            </div>
+
+            <dl class="sh-words-list">
+                @foreach (var term in group.Terms)
+                {
+                    <div class="sh-word" data-word>
+                        <dt>
+                            <span class="sh-word-name">@term.Word</span>
+                            @if (!string.IsNullOrEmpty(term.AlsoCalled))
+                            {
+                                <span class="sh-word-also">Also called: @term.AlsoCalled</span>
+                            }
+                        </dt>
+                        <dd>@Rich(term.MeaningHtml)</dd>
+                    </div>
+                }
+            </dl>
+        </section>
+    }
+
+    @if (Model.EaseOfUse != null)
+    {
+        <section class="sh-card sh-words-group" id="sh-easier" aria-labelledby="sh-easier-title">
+            <div class="sh-task-head">
+                <span class="sh-task-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">accessibility_new</span>
+                </span>
+                <div class="sh-task-heading">
+                    <h3 class="sh-task-title" id="sh-easier-title">Make Smart Hydro easier to use</h3>
+                    <p class="sh-task-why">Ways to make the screen easier to see, hear and use. This help guide has the same high contrast and dark mode buttons at the top right.</p>
+                </div>
+            </div>
+
+            <div class="sh-table-scroll">
+                <table class="sh-table sh-words-easier">
+                    <thead>
+                        <tr>
+                            @foreach (var header in Model.EaseOfUse.Headers)
+                            {
+                                <th scope="col">@header</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.EaseOfUse.Rows)
+                        {
+                            <tr>
+                                @for (var i = 0; i < row.Count; i++)
+                                {
+                                    if (i == 0)
+                                    {
+                                        <th scope="row">@row[i]</th>
+                                    }
+                                    else
+                                    {
+                                        <td>@row[i]</td>
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/words.js" asp-append-version="true"></script>
+}

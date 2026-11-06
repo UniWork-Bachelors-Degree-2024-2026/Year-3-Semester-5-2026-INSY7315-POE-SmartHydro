@@ -1,0 +1,16 @@
+﻿<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast sh-toast" id="sh-live-toast" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="4500">
+        <div class="sh-toast-inner">
+            <span class="sh-toast-icon" aria-hidden="true">
+                <span class="material-symbols-outlined" id="sh-live-toast-icon">check</span>
+            </span>
+            <div class="toast-body">
+                <span id="sh-live-toast-text"></span>
+                <a class="sh-toast-link" id="sh-live-toast-link" asp-controller="Camera" asp-action="Index" hidden>View gallery</a>
+            </div>
+            <button type="button" class="sh-toast-close" data-bs-dismiss="toast" aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+        </div>
+    </div>
+</div>

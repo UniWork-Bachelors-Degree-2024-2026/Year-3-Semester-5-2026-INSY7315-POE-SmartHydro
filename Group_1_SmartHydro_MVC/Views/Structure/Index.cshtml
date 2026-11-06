@@ -1,0 +1,301 @@
+@model Group_1_SmartHydro_MVC.Models.StructureListViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " Structures";
+    ViewData["LiveRefresh"] = true;
+
+    var currentSite = await SiteContext.GetCurrentAsync();
+}
+
+<div class="sh-status-header">
+    <div>
+        <h2 class="sh-status-title">Choose a Structure</h2>
+        @if (Model.CanManage)
+        {
+            <span class="sh-status-subtitle">Pick a structure to see its readings, or add a new one.</span>
+        }
+        else
+        {
+            <span class="sh-status-subtitle">Pick a structure to see its readings.</span>
+        }
+    </div>
+    @if (Model.CanManage && currentSite != null)
+    {
+        <a class="sh-primary-btn" asp-controller="Structure" asp-action="Add">
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
+            Add a Structure
+        </a>
+    }
+</div>
+
+@if (currentSite == null)
+{
+    <div class="sh-flash sh-flash-muted" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">sensors</span>
+        <span>Choose a site from the sidebar to see its structures.</span>
+    </div>
+}
+
+@if (Model.LoadFailed)
+{
+    <div class="sh-flash sh-flash-muted" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+        <span>This site's structures couldn't be loaded right now. Please refresh the page to try again.</span>
+    </div>
+}
+
+@if (TempData["SiteCreated"] is string siteName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>Site "@siteName" was created. Add its first structure below.</span>
+    </div>
+}
+
+@if (TempData["SiteDeleted"] is string deletedSiteName)
+{
+    var deletedSiteStructures = 0;
+    if (TempData["SiteDeletedStructures"] is int movedCount)
+    {
+        deletedSiteStructures = movedCount;
+    }
+
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>
+            Site "@deletedSiteName" was deleted.
+            @if (deletedSiteStructures == 1)
+            {
+                <text>Its 1 structure was moved to deleted items.</text>
+            }
+            else if (deletedSiteStructures > 1)
+            {
+                <text>Its @deletedSiteStructures structures were moved to deleted items.</text>
+            }
+        </span>
+    </div>
+}
+
+@if (TempData["StructureAdded"] is string addedName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>"@addedName" was added to your site.</span>
+    </div>
+}
+
+@if (TempData["StructureDeleted"] is string deletedName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>"@deletedName" was moved to deleted items.</span>
+        @if (TempData["StructureDeletedId"] is string deletedId)
+        {
+            <form asp-controller="Structure" asp-action="Restore" method="post" class="d-inline">
+                <input type="hidden" name="id" value="@deletedId" />
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-link p-0">Undo</button>
+            </form>
+        }
+    </div>
+}
+
+@if (TempData["StructureUpdated"] is string updatedName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>"@updatedName" was updated.</span>
+    </div>
+}
+
+@if (TempData["StructureRestored"] is string restoredName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>"@restoredName" was restored.</span>
+    </div>
+}
+
+@if (TempData["StructureRestoreError"] is string restoreError)
+{
+    <div class="sh-flash" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>@restoreError</span>
+    </div>
+}
+
+@if (TempData["StructurePurged"] is string purgedName)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>"@purgedName" was permanently deleted.</span>
+    </div>
+}
+
+@if (TempData["SelectStructure"] is string selectMessage)
+{
+    <div class="modal fade sh-select-modal" id="sh-select-structure-modal" tabindex="-1"
+         aria-labelledby="sh-select-structure-title" aria-describedby="sh-select-structure-text" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center px-4 py-5">
+                    <span class="sh-select-modal-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">grid_view</span>
+                    </span>
+                    <h2 class="sh-select-modal-title" id="sh-select-structure-title">Select a structure</h2>
+                    <p class="sh-select-modal-text" id="sh-select-structure-text">@selectMessage</p>
+                    <button type="button" class="sh-primary-btn sh-select-modal-btn" data-bs-dismiss="modal">Choose a structure</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="sh-structure-list">
+    @foreach (var structure in Model.Structures)
+    {
+        var cardClass = "sh-card sh-structure-card level-" + structure.StatusLevel;
+
+        <div class="@cardClass" data-structure-type="@structure.Type.ToString().ToLowerInvariant()">
+            <partial name="_StructureSummary" model="structure" />
+
+            <div class="sh-structure-meta">
+                <div class="sh-structure-updated">
+                    <span>Updated</span>
+                    <strong>@structure.UpdatedAt</strong>
+                </div>
+                <a class="sh-details-link stretched-link" asp-controller="Dashboard" asp-action="Index" asp-route-id="@structure.Id" aria-label="Details for @structure.Name">
+                    Details <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </a>
+                @if (Model.CanManage)
+                {
+                <div class="sh-structure-actions">
+                    <a class="sh-structure-edit" asp-controller="Structure" asp-action="Edit" asp-route-id="@structure.Id" title="Edit @structure.Name" aria-label="Edit @structure.Name">
+                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                        <span class="sh-structure-action-label">Edit</span>
+                    </a>
+                    <button type="button" class="sh-structure-delete" title="Delete @structure.Name" aria-label="Delete @structure.Name"
+                            data-structure-id="@structure.Id" data-structure-name="@structure.Name">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        <span class="sh-structure-action-label">Delete</span>
+                    </button>
+                </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.CanManage && currentSite != null)
+    {
+        <a class="sh-structure-add" asp-controller="Structure" asp-action="Add">
+            <span class="sh-structure-add-icon" aria-hidden="true">
+                <span class="material-symbols-outlined" aria-hidden="true">add</span>
+            </span>
+            <span class="sh-structure-add-title">Add a Structure</span>
+            <span class="sh-structure-add-text">Set up a new hydroponic or fodder structure.</span>
+        </a>
+    }
+    else if (currentSite != null && Model.Structures.Count == 0 && !Model.LoadFailed)
+    {
+        <p class="sh-structure-tip">This site doesn't have any structures yet. Your operator will add them.</p>
+    }
+
+    <p class="sh-structure-tip">Tip: Tap a structure to see its readings and controls.</p>
+</div>
+
+@if (Model.DeletedStructures.Any())
+{
+    <div class="sh-status-header">
+        <div>
+            <h2 class="sh-status-title">Deleted Structures</h2>
+            <span class="sh-status-subtitle">Bring a structure back, or delete it for good. This can't be undone.</span>
+        </div>
+    </div>
+
+    <div class="sh-structure-list">
+        @foreach (var structure in Model.DeletedStructures)
+        {
+            <div class="sh-card sh-structure-card level-none">
+                <partial name="_StructureSummary" model="structure" />
+
+                <div class="sh-structure-meta">
+                    <div class="sh-structure-updated">
+                        <span>Deleted</span>
+                        <strong>@structure.Name</strong>
+                    </div>
+                    <div class="sh-structure-actions">
+                        <form asp-controller="Structure" asp-action="Restore" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@structure.Id" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="sh-structure-edit" title="Restore @structure.Name" aria-label="Restore @structure.Name">
+                                <span class="material-symbols-outlined" aria-hidden="true">restore_from_trash</span>
+                                <span class="sh-structure-action-label">Restore</span>
+                            </button>
+                        </form>
+                        <button type="button" class="sh-structure-delete" title="Permanently delete @structure.Name" aria-label="Permanently delete @structure.Name"
+                                data-structure-purge="true" data-structure-id="@structure.Id" data-structure-name="@structure.Name">
+                            <span class="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                            <span class="sh-structure-action-label">Purge</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="modal fade sh-clear-modal" id="sh-delete-structure-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-delete-structure-title" aria-describedby="sh-delete-structure-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-delete-structure-form" method="post" asp-controller="Structure" asp-action="Delete">
+                <input type="hidden" name="id" id="sh-delete-structure-id" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-delete-structure-title">Are you sure?</h2>
+                    <p class="sh-clear-text" id="sh-delete-structure-text">
+                        <strong id="sh-delete-structure-name"></strong> will be moved to deleted items. You can undo this straight afterwards.
+                    </p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" id="sh-delete-structure-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-delete-structure-submit">Yes, delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-purge-structure-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-purge-structure-title" aria-describedby="sh-purge-structure-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-purge-structure-form" method="post" asp-controller="Structure" asp-action="Purge">
+                <input type="hidden" name="id" id="sh-purge-structure-id" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-purge-structure-title">Permanently delete?</h2>
+                    <p class="sh-clear-text" id="sh-purge-structure-text">
+                        <strong id="sh-purge-structure-name"></strong> will be permanently removed. This cannot be restored afterwards.
+                    </p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" id="sh-purge-structure-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-purge-structure-submit">Yes, permanently delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/structure-index.js" asp-append-version="true"></script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/clear-modal.css" asp-append-version="true" />
+}

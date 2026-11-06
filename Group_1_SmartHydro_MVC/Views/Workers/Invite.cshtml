@@ -1,0 +1,363 @@
+@model Group_1_SmartHydro_MVC.Models.InviteWorkerViewModel
+
+@{
+    ViewData["Title"] = "Invite Worker";
+    var hasSites = Model.Sites.Any();
+    var culture = System.Globalization.CultureInfo.InvariantCulture;
+    var joinedCount = Model.Team.Count(m => m.Status == "Joined");
+    var waitingCount = Model.Team.Count(m => m.Status == "Invited");
+
+    string StatusTone(string status)
+    {
+        if (status == "Joined")
+        {
+            return "sh-adm-status tone-good";
+        }
+
+        if (status == "Invited")
+        {
+            return "sh-adm-status tone-caution";
+        }
+
+        return "sh-adm-status tone-muted";
+    }
+
+    string RowTone(string status)
+    {
+        if (status == "Joined")
+        {
+            return "sh-adm-row tone-good";
+        }
+
+        if (status == "Invited")
+        {
+            return "sh-adm-row tone-caution";
+        }
+
+        return "sh-adm-row tone-muted";
+    }
+
+    string StatusIcon(string status)
+    {
+        if (status == "Joined")
+        {
+            return "check_circle";
+        }
+
+        if (status == "Invited")
+        {
+            return "schedule";
+        }
+
+        return "timer_off";
+    }
+
+    string StatusLabel(string status)
+    {
+        if (status == "Invited")
+        {
+            return "Waiting";
+        }
+
+        return status;
+    }
+
+    string When(TeamMember member)
+    {
+        var date = member.Since.ToLocalTime().ToString("d MMM yyyy", culture);
+
+        if (member.Status == "Joined")
+        {
+            return "Joined " + date;
+        }
+
+        return "Invited " + date;
+    }
+
+    string Detail(TeamMember member)
+    {
+        if (member.Status != "Invited" || !member.ExpiresAt.HasValue)
+        {
+            return "";
+        }
+
+        var left = member.ExpiresAt.Value - DateTime.UtcNow;
+
+        if (left.TotalHours >= 1)
+        {
+            return "Expires in " + Math.Floor(left.TotalHours).ToString(culture) + " h";
+        }
+
+        return "Expires in under an hour";
+    }
+
+    string Initial(TeamMember member)
+    {
+        var name = (member.FullName ?? member.Email).Trim();
+
+        if (name.Length == 0)
+        {
+            return "?";
+        }
+
+        return name.Substring(0, 1).ToUpperInvariant();
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/workers.css" asp-append-version="true" />
+}
+
+<div class="sh-status-header">
+    <div>
+        <h2 class="sh-status-title">Invite Worker</h2>
+        <span class="sh-status-subtitle">Give someone access to one of your sites. They'll get a secure link and an access code by email.</span>
+    </div>
+</div>
+
+@{
+    var errorMessage = ViewData["InviteWorkerError"] as string;
+    if (TempData["InviteWorkerError"] is string actionError)
+    {
+        errorMessage = actionError;
+    }
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="sh-flash sh-inv-flash-error" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>@errorMessage</span>
+    </div>
+}
+
+@if (TempData["InviteWorkerMessage"] is string message)
+{
+    <div class="sh-flash" role="status">
+        <span class="material-symbols-outlined" aria-hidden="true">mark_email_read</span>
+        <span>@message</span>
+    </div>
+}
+
+<div class="sh-add-layout">
+    <form class="sh-card sh-add-form sh-inv-form" id="sh-inv-form" asp-controller="Workers" asp-action="Invite" method="post">
+        <div class="sh-inv-form-head">
+            <span class="sh-inv-form-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">person_add</span>
+            </span>
+            <div>
+                <h3 class="sh-inv-form-title">New invitation</h3>
+                <p class="sh-inv-form-text">Choose the site and enter their email.</p>
+            </div>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="sh-field-error"></div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" for="SiteId">Site</label>
+            <div class="sh-select-wrap">
+                <select asp-for="SiteId" class="sh-input sh-select" disabled="@(!hasSites)">
+                    <option value="">Select a site</option>
+                    @foreach (var site in Model.Sites)
+                    {
+                        <option value="@site.Id">@site.Name</option>
+                    }
+                </select>
+                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+            </div>
+            <span asp-validation-for="SiteId" class="sh-field-error"></span>
+        </div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" asp-for="Email">Worker email address</label>
+            <div class="sh-inv-input">
+                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                <input asp-for="Email" class="sh-input" type="email" placeholder="worker@farm.com" autocomplete="off" disabled="@(!hasSites)" />
+            </div>
+            <span asp-validation-for="Email" class="sh-field-error"></span>
+        </div>
+
+        <p class="sh-inv-expiry">
+            <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+            The link and access code expire after 24 hours.
+        </p>
+
+        <button type="submit" class="sh-submit-btn sh-inv-submit" disabled="@(!hasSites)">
+            <span class="material-symbols-outlined" aria-hidden="true">send</span>
+            Send Invitation
+        </button>
+    </form>
+
+    <aside class="sh-card sh-inv-steps" aria-labelledby="sh-inv-steps-title">
+        <h3 class="sh-preview-heading" id="sh-inv-steps-title">How it works</h3>
+
+        <ol class="sh-inv-step-list">
+            <li>
+                <span class="sh-inv-step-number" aria-hidden="true">1</span>
+                <div>
+                    <strong>They get an email</strong>
+                    <span>It has a secure link and an 8-character access code.</span>
+                </div>
+            </li>
+            <li>
+                <span class="sh-inv-step-number" aria-hidden="true">2</span>
+                <div>
+                    <strong>They join the site</strong>
+                    <span>They open the link and set up their account, or enter the code in the mobile app.</span>
+                </div>
+            </li>
+            <li>
+                <span class="sh-inv-step-number" aria-hidden="true">3</span>
+                <div>
+                    <strong>They start working</strong>
+                    <span>They can see the site's structures, readings, alerts and photos.</span>
+                </div>
+            </li>
+        </ol>
+
+        <p class="sh-inv-note">
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+            Workers can't add or delete structures or sites. You can invite them again if the link expires.
+        </p>
+    </aside>
+</div>
+
+<section class="sh-card sh-adm-card sh-inv-team" aria-labelledby="sh-inv-team-title">
+    <div class="sh-adm-card-head">
+        <div class="sh-adm-card-heading">
+            <h3 class="sh-adm-card-title" id="sh-inv-team-title">Your team</h3>
+            <span class="sh-adm-showing">@joinedCount joined, @waitingCount waiting to join</span>
+        </div>
+    </div>
+
+    @if (Model.TeamLoadFailed)
+    {
+        <p class="sh-adm-empty-inline">
+            <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+            Your team couldn't be loaded right now. Refresh the page to try again.
+        </p>
+    }
+    else if (Model.Team.Count == 0)
+    {
+        <div class="sh-adm-empty">
+            <span class="sh-adm-empty-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">group_add</span>
+            </span>
+            <h3 class="sh-adm-empty-title">No workers yet</h3>
+            <p class="sh-adm-empty-text">People you invite appear here, and move to Joined once they accept.</p>
+        </div>
+    }
+    else
+    {
+        <div class="sh-adm-table-wrap">
+            <table class="sh-adm-table">
+                <caption class="visually-hidden">Workers and invitations</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Worker</th>
+                        <th scope="col">Site</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date</th>
+                        <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var member in Model.Team)
+                    {
+                        var actionClass = "sh-adm-col-action";
+
+                        <tr class="@RowTone(member.Status)">
+                            <td class="is-lead">
+                                <div class="sh-adm-person">
+                                    <span class="sh-adm-avatar" aria-hidden="true">@Initial(member)</span>
+                                    <span class="sh-adm-person-text">
+                                        @if (string.IsNullOrWhiteSpace(member.FullName))
+                                        {
+                                            <a class="sh-adm-person-name sh-adm-mail" href="mailto:@member.Email" title="Email @member.Email">@member.Email</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="sh-adm-person-name">@member.FullName</span>
+                                            <a class="sh-adm-person-sub sh-adm-mail" href="mailto:@member.Email" title="Email @member.Email">@member.Email</a>
+                                        }
+                                    </span>
+                                </div>
+                            </td>
+                            <td data-label="Site">@member.SiteName</td>
+                            <td data-label="Status">
+                                <span class="@StatusTone(member.Status)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">@StatusIcon(member.Status)</span>
+                                    @StatusLabel(member.Status)
+                                </span>
+                            </td>
+                            <td data-label="Date" class="is-date">
+                                <span class="sh-adm-person-text">
+                                    <span>@When(member)</span>
+                                    @if (Detail(member).Length > 0)
+                                    {
+                                        <span class="sh-adm-person-sub">@Detail(member)</span>
+                                    }
+                                </span>
+                            </td>
+                            <td data-label="Actions" class="@actionClass">
+                                @if (member.Status == "Expired")
+                                {
+                                    <a class="sh-adm-btn" aria-label="Invite @member.Email again" asp-action="Invite" asp-route-siteId="@member.SiteId" asp-route-email="@member.Email" asp-fragment="sh-inv-form">
+                                        <span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span>
+                                        Invite again
+                                    </a>
+                                }
+                                @if (member.Status == "Joined" && member.UserId.HasValue)
+                                {
+                                    <button type="button" class="sh-adm-btn is-danger" title="Remove @member.Email from @member.SiteName" aria-label="Remove @member.Email from @member.SiteName"
+                                            data-team-action="@Url.Action("RemoveMember", "Workers", new { siteId = member.SiteId, userId = member.UserId })"
+                                            data-team-kind="remove" data-team-email="@member.Email" data-team-site="@member.SiteName">
+                                        <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
+                                        Remove
+                                    </button>
+                                }
+                                @if (member.Status == "Invited")
+                                {
+                                    <button type="button" class="sh-adm-btn is-danger" title="Cancel the invitation to @member.Email" aria-label="Cancel the invitation to @member.Email"
+                                            data-team-action="@Url.Action("CancelInvite", "Workers", new { siteId = member.SiteId })"
+                                            data-team-kind="cancel" data-team-email="@member.Email" data-team-site="@member.SiteName">
+                                        <span class="material-symbols-outlined" aria-hidden="true">cancel_schedule_send</span>
+                                        Cancel invite
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<div class="modal fade sh-clear-modal" id="sh-team-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-team-modal-title" aria-describedby="sh-team-modal-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-team-modal-form" method="post" asp-antiforgery="true" action="#">
+                <input type="hidden" name="email" id="sh-team-modal-email" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" id="sh-team-modal-icon">person_remove</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-team-modal-title">Remove from site?</h2>
+                    <p class="sh-clear-text" id="sh-team-modal-text"></p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Keep</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-team-modal-confirm">Yes, remove</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/workers.js" asp-append-version="true"></script>
+}

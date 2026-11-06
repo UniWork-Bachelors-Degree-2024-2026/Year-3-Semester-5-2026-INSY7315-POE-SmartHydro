@@ -1,0 +1,380 @@
+﻿@using System.Linq
+@inject Group_1_SmartHydro_MVC.Services.AlertApiClient AlertApi
+@inject Group_1_SmartHydro_MVC.Services.AdminApiClient AdminApi
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var site = await SiteContext.GetCurrentAsync();
+
+    var hasChosenStructure = false;
+    if (site != null)
+    {
+        hasChosenStructure = SiteContext.LastViewedStructureId(site.Id) != null;
+    }
+
+    var unresolvedAlerts = 0;
+    if (site != null)
+    {
+        unresolvedAlerts = await AlertApi.GetUnresolvedCountAsync(site.Id, User.GetAccessToken(), Context.RequestAborted);
+    }
+
+    // Operators awaiting approval, so the admin can see at a glance that requests are waiting
+    var pendingApprovals = 0;
+    if (User.IsInRole("Admin"))
+    {
+        try
+        {
+            var pending = await AdminApi.GetPendingOperatorsAsync(User.GetAccessToken(), Context.RequestAborted);
+            pendingApprovals = pending?.Count ?? 0;
+        }
+        catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is System.Text.Json.JsonException)
+        {
+            // The sidebar renders on every page, so a failed lookup just hides the badge
+            pendingApprovals = 0;
+        }
+    }
+
+    var pendingApprovalsContentClass = pendingApprovals > 0 ? "sh-nav-content has-dot" : "sh-nav-content";
+    var pendingApprovalsLabel = pendingApprovals == 1 ? "1 pending approval" : $"{pendingApprovals} pending approvals";
+    var pendingNavLabel = pendingApprovals > 0 ? "Pending Approvals, " + pendingApprovalsLabel : "Pending Approvals";
+    var alertsNavLabel = unresolvedAlerts > 0 ? $"Alerts, {unresolvedAlerts} unresolved" : "Alerts";
+
+    var readingsHint = "Choose a structure first to see its readings";
+    if (site != null && site.StructureCount == 0)
+    {
+        readingsHint = "Add a structure first to see readings";
+    }
+
+    var pillName = "Select a site";
+    var pillLabel = "Select a site";
+
+    if (site != null)
+    {
+        pillName = site.Name;
+        pillLabel = $"Current site: {site.Name}. Change site";
+    }
+
+    string NavClass(params string[] controllerNames)
+    {
+        var css = "sh-nav-link";
+
+        if (controllerNames.Contains(currentController))
+        {
+            css += " active";
+        }
+
+        return css;
+    }
+
+    string AdminNavClass(string actionName)
+    {
+        var css = "sh-nav-link";
+
+        if (currentController == "Admin" && string.Equals(currentAction, actionName, StringComparison.OrdinalIgnoreCase))
+        {
+            css += " active";
+        }
+
+        return css;
+    }
+
+    string? NavCurrent(params string[] controllerNames)
+    {
+        if (controllerNames.Contains(currentController))
+        {
+            return "page";
+        }
+
+        return null;
+    }
+
+    string? AdminNavCurrent(string actionName)
+    {
+        if (currentController == "Admin" && string.Equals(currentAction, actionName, StringComparison.OrdinalIgnoreCase))
+        {
+            return "page";
+        }
+
+        return null;
+    }
+}
+
+<aside class="sh-sidebar" id="sh-sidebar" aria-label="Sidebar">
+
+    <!-- Brand -->
+    <div class="sh-brand">
+        <span class="sh-brand-icon">
+            <img src="~/images/logo.png" alt="Smart Hydro logo" />
+        </span>
+
+        <div class="sh-brand-text">
+            <span class="sh-brand-name">Smart Hydro</span>
+            <span class="sh-brand-sub">Farming Made Smart</span>
+        </div>
+    </div>
+
+    <a class="sh-skip-link" href="#sh-main-content">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="sh-nav" aria-label="Main">
+
+        <!-- Admin (Admin only, listed first) -->
+        @if (User.IsInRole("Admin"))
+        {
+            <span class="sh-nav-section">Admin</span>
+
+            <a class="@AdminNavClass("Index")"
+               aria-current="@AdminNavCurrent("Index")"
+               aria-label="Admin Dashboard"
+               asp-controller="Admin"
+               asp-action="Index">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        dashboard
+                    </span>
+
+                    <span class="sh-nav-text">Admin Dashboard</span>
+                </span>
+            </a>
+
+            <a class="@AdminNavClass("Sites")"
+               aria-current="@AdminNavCurrent("Sites")"
+               aria-label="Sites by Operator"
+               asp-controller="Admin"
+               asp-action="Sites">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        holiday_village
+                    </span>
+
+                    <span class="sh-nav-text">Sites by Operator</span>
+                </span>
+            </a>
+
+            <a class="@AdminNavClass("PendingApprovals")"
+               aria-current="@AdminNavCurrent("PendingApprovals")"
+               aria-label="@pendingNavLabel"
+               asp-controller="Admin"
+               asp-action="PendingApprovals">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="@pendingApprovalsContentClass">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        how_to_reg
+                    </span>
+
+                    <span class="sh-nav-text sh-nav-text-nowrap">
+                        Pending Approvals
+                        @if (pendingApprovals > 0)
+                        {
+                            <span class="sh-nav-dot" aria-hidden="true"></span>
+                        }
+                    </span>
+                </span>
+            </a>
+
+            <span class="sh-nav-section">Farm</span>
+        }
+
+        <!-- Structure -->
+        <a class="@NavClass("Structure")"
+           aria-current="@NavCurrent("Structure")"
+           aria-label="Structure"
+           asp-controller="Structure"
+           asp-action="Index">
+
+            <span class="sh-nav-accent"></span>
+
+            <span class="sh-nav-content">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                    grid_view
+                </span>
+
+                <span class="sh-nav-text">Structure</span>
+            </span>
+        </a>
+
+        <!-- Readings -->
+        @if (hasChosenStructure)
+        {
+            <a class="@NavClass("Dashboard", "Sensors")"
+               aria-current="@NavCurrent("Dashboard", "Sensors")"
+               aria-label="Readings"
+               asp-controller="Dashboard"
+               asp-action="Index"
+               asp-route-source="home">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        monitoring
+                    </span>
+
+                    <span class="sh-nav-text">Readings</span>
+                </span>
+            </a>
+        }
+        else
+        {
+            <span class="sh-nav-link is-disabled"
+                  id="sh-readings-locked"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Readings, unavailable. @readingsHint"
+                  aria-disabled="true"
+                  aria-haspopup="dialog"
+                  title="@readingsHint">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        monitoring
+                    </span>
+
+                    <span class="sh-nav-text">Readings</span>
+                </span>
+            </span>
+        }
+
+        <!-- Camera -->
+        <a class="@NavClass("Camera")"
+           aria-current="@NavCurrent("Camera")"
+           aria-label="Camera"
+           asp-controller="Camera"
+           asp-action="Index">
+
+            <span class="sh-nav-accent"></span>
+
+            <span class="sh-nav-content">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                    videocam
+                </span>
+
+                <span class="sh-nav-text">Camera</span>
+            </span>
+        </a>
+
+        <!-- Alerts -->
+        <a class="@NavClass("Alerts")"
+           aria-current="@NavCurrent("Alerts")"
+           aria-label="@alertsNavLabel"
+           asp-controller="Alerts"
+           asp-action="Index">
+
+            <span class="sh-nav-accent"></span>
+
+            <span class="sh-nav-content">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                    notifications
+                </span>
+
+                <span class="sh-nav-text">Alerts</span>
+
+                @if (unresolvedAlerts > 0)
+                {
+                    <span class="sh-nav-badge sh-nav-alert-badge"
+                          aria-hidden="true">@(unresolvedAlerts > 99 ? "99+" : unresolvedAlerts.ToString())</span>
+                }
+            </span>
+        </a>
+
+        <!-- Thresholds (Operator and Admin) -->
+        @if (User.CanManageSites())
+        {
+            <a class="@NavClass("Thresholds")"
+               aria-current="@NavCurrent("Thresholds")"
+               aria-label="Thresholds"
+               asp-controller="Thresholds"
+               asp-action="Index">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        tune
+                    </span>
+
+                    <span class="sh-nav-text">Thresholds</span>
+                </span>
+            </a>
+        }
+
+        <!-- Invite Worker (Operator only) -->
+        @if (User.IsInRole("Operator"))
+        {
+            <a class="@NavClass("Workers")"
+               aria-current="@NavCurrent("Workers")"
+               aria-label="Invite Worker"
+               asp-controller="Workers"
+               asp-action="Invite">
+
+                <span class="sh-nav-accent"></span>
+
+                <span class="sh-nav-content">
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                        person_add
+                    </span>
+
+                    <span class="sh-nav-text">Invite Worker</span>
+                </span>
+            </a>
+        }
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sh-sidebar-footer">
+
+        <!-- Site Selector -->
+        <button type="button"
+                class="sh-structure-pill sh-site-pill"
+                data-bs-toggle="modal"
+                data-bs-target="#sh-site-modal"
+                title="Change site"
+                aria-label="@pillLabel"
+                aria-haspopup="dialog">
+
+            <span class="material-symbols-outlined" aria-hidden="true">
+                sensors
+            </span>
+
+            <span class="sh-nav-text sh-site-pill-name">
+                @pillName
+            </span>
+
+            <span class="material-symbols-outlined sh-site-pill-swap"
+                  aria-hidden="true">
+                unfold_more
+            </span>
+        </button>
+
+        <div class="sh-footer-divider"></div>
+
+        <!-- Logout -->
+        <button type="button"
+                class="sh-logout-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#sh-logout-modal"
+                aria-label="Log out"
+                aria-haspopup="dialog">
+
+            <span class="material-symbols-outlined"
+                  aria-hidden="true">
+                logout
+            </span>
+
+            <span class="sh-nav-text">Log out</span>
+        </button>
+
+    </div>
+
+</aside>

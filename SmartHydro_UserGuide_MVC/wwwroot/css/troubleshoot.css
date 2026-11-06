@@ -1,0 +1,251 @@
+.sh-guide-stack > .sh-card {
+    scroll-margin-top: 5.5rem;
+}
+
+.sh-ts-jump ul {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    columns: 3 12rem;
+    column-gap: 1.5rem;
+}
+
+.sh-ts-jump li {
+    break-inside: avoid;
+    padding: 0.2rem 0;
+}
+
+.sh-guide-stack .sh-ts-jump a {
+    text-decoration: none;
+}
+
+    .sh-guide-stack .sh-ts-jump a:hover {
+        text-decoration: underline;
+    }
+
+.sh-ts-checks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1rem;
+}
+
+.sh-ts-panel {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--sh-border);
+    scroll-margin-top: 5.5rem;
+}
+
+.sh-ts-ready .sh-ts-panel {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 0;
+    border-top: 0;
+}
+
+    .sh-ts-ready .sh-ts-panel.is-active {
+        display: block;
+    }
+
+.sh-ts-ask {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+
+    .sh-ts-ask:focus {
+        outline: none;
+    }
+
+    .sh-ts-ask:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+.sh-ts-answers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+}
+
+.sh-guide-stack .sh-ts-answer {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--sh-border-strong);
+    border-radius: 12px;
+    background: var(--sh-card-bg);
+    color: var(--sh-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .sh-guide-stack .sh-ts-answer:hover {
+        border-color: var(--sh-mint-border);
+        background: var(--sh-mint);
+    }
+
+    .sh-guide-stack .sh-ts-answer:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 2px;
+    }
+
+    .sh-ts-answer .material-symbols-outlined {
+        flex-shrink: 0;
+        color: var(--sh-ink);
+    }
+
+.sh-ts-try {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sh-text-muted);
+}
+
+.sh-ts-fix {
+    padding: 1rem 1.1rem;
+    border-left: 4px solid var(--al-resolved);
+    border-radius: 0 12px 12px 0;
+    background: var(--al-resolved-soft);
+}
+
+    .sh-ts-fix .sh-ts-ask .material-symbols-outlined {
+        color: var(--al-resolved);
+    }
+
+.sh-ts-fix-steps {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.6rem 0 0;
+    padding-left: 1.3rem;
+    color: var(--sh-text);
+}
+
+.sh-guide-stack .sh-ts-showme {
+    margin-top: 0.9rem;
+    text-decoration: none;
+}
+
+.sh-ts-still {
+    margin: 0.8rem 0 0;
+    font-size: 0.9rem;
+    color: var(--sh-text-soft);
+}
+
+.sh-ts-trail {
+    margin: 0.9rem 0 0;
+    font-size: 0.88rem;
+    color: var(--sh-text-muted);
+}
+
+    .sh-ts-trail[hidden] {
+        display: none;
+    }
+
+.sh-ts-actions [hidden] {
+    display: none;
+}
+
+.sh-ts-messages th[scope="row"] {
+    font-weight: 400;
+    text-align: left;
+    vertical-align: top;
+    min-width: 12rem;
+}
+
+.sh-ts-messages td {
+    vertical-align: top;
+}
+
+.sh-ts-faq-group + .sh-ts-faq-group {
+    margin-top: 1.4rem;
+}
+
+.sh-ts-faq-group {
+    margin-top: 1.1rem;
+    scroll-margin-top: 5.5rem;
+}
+
+.sh-ts-faq-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sh-ink);
+}
+
+.sh-ts-faq {
+    border: 1px solid var(--sh-border);
+    border-radius: 12px;
+    background: var(--sh-card-bg);
+}
+
+    .sh-ts-faq + .sh-ts-faq {
+        margin-top: 0.5rem;
+    }
+
+    .sh-ts-faq summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        padding: 0.8rem 1rem;
+        font-weight: 600;
+        color: var(--sh-text);
+        cursor: pointer;
+        list-style: none;
+    }
+
+        .sh-ts-faq summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .sh-ts-faq summary::after {
+            content: "+";
+            flex-shrink: 0;
+            font-size: 1.2rem;
+            line-height: 1;
+            color: var(--sh-ink);
+        }
+
+        .sh-ts-faq summary:focus-visible {
+            outline: 3px solid var(--sh-focus-ring);
+            outline-offset: 2px;
+            border-radius: 12px;
+        }
+
+    .sh-ts-faq[open] summary::after {
+        content: "\2212";
+    }
+
+    .sh-ts-faq p {
+        margin: 0;
+        padding: 0 1rem 0.9rem;
+        color: var(--sh-text-soft);
+    }
+
+.sh-ts-tell {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.6rem 0 0;
+    padding-left: 1.3rem;
+}
+
+@media (max-width: 640px) {
+    .sh-ts-checks,
+    .sh-ts-answers {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Group_1_SmartHydro_MVC/Group_1_SmartHydro_MVC.csproj" />
+  <Project Path="Group_1_SmartHydro_MVC_Tests/Group_1_SmartHydro_MVC_Tests.csproj" Id="fd8543f0-f883-49ba-92ba-e7e6030da712" />
+  <Project Path="SmartHydroAPI/SmartHydroAPI.csproj" Id="91bae9b2-c0bc-423c-8eef-2b0482c8944f" />
+  <Project Path="SmartHydroAPI_Tests/SmartHydroAPI_Tests.csproj" Id="cd839212-f45e-4275-92a7-361c22c9734a" />
+  <Project Path="SmartHydro_UserGuide_MVC/SmartHydro_UserGuide_MVC.csproj" Id="0daca762-42e2-4479-ab34-bf7c1ca77f07" />
+</Solution>

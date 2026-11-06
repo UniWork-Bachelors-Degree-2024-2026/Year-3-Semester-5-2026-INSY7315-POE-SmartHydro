@@ -1,0 +1,63 @@
+﻿@{
+    var onStructurePage = string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Structure", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase);
+
+    var currentSite = await SiteContext.GetCurrentAsync();
+    var canManage = User.CanManageSites();
+    var hasNoStructures = currentSite != null && currentSite.StructureCount == 0;
+
+    var icon = "grid_view";
+    var title = "Select a structure";
+    var text = "Please select a structure to see its readings.";
+    var buttonLabel = "Choose a structure";
+    var showButton = true;
+
+    if (currentSite == null)
+    {
+        icon = "sensors";
+        title = "Select a site";
+        text = "Choose a site from the sidebar first, then pick one of its structures to see its readings.";
+        showButton = false;
+    }
+    else if (hasNoStructures && canManage)
+    {
+        icon = "add";
+        title = "Add a structure";
+        text = currentSite.Name + " doesn't have any structures yet. Add one to start seeing its readings.";
+        buttonLabel = "Show me where";
+    }
+    else if (hasNoStructures)
+    {
+        icon = "grid_view";
+        title = "No structures yet";
+        text = "Your operator hasn't added any structures to " + currentSite.Name + " yet. Readings will appear once they do.";
+        showButton = false;
+    }
+}
+
+<div class="modal fade sh-select-modal" id="sh-readings-locked-modal" tabindex="-1"
+     aria-labelledby="sh-readings-locked-title" aria-describedby="sh-readings-locked-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center px-4 py-5">
+                <span class="sh-select-modal-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined sh-icon-filled">@icon</span>
+                </span>
+                <h2 class="sh-select-modal-title" id="sh-readings-locked-title">@title</h2>
+                <p class="sh-select-modal-text" id="sh-readings-locked-text">@text</p>
+                @if (!showButton)
+                {
+                    <button type="button" class="sh-primary-btn sh-select-modal-btn" data-bs-dismiss="modal">OK</button>
+                }
+                else if (onStructurePage)
+                {
+                    <button type="button" class="sh-primary-btn sh-select-modal-btn" data-bs-dismiss="modal">@buttonLabel</button>
+                }
+                else
+                {
+                    <a class="sh-primary-btn sh-select-modal-btn" asp-controller="Structure" asp-action="Index" asp-route-choose="structure">@buttonLabel</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

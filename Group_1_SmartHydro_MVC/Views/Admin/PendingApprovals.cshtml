@@ -1,0 +1,147 @@
+﻿﻿@using Group_1_SmartHydro_MVC.Services
+@model List<PendingOperator>
+
+@{
+    ViewData["Title"] = "Pending Approvals";
+    var culture = System.Globalization.CultureInfo.InvariantCulture;
+
+    string Initial(PendingOperator account)
+    {
+        var trimmed = (account.FullName ?? "").Trim();
+
+        if (trimmed.Length == 0)
+        {
+            trimmed = (account.Email ?? "").Trim();
+        }
+
+        if (trimmed.Length == 0)
+        {
+            return "?";
+        }
+
+        return trimmed.Substring(0, 1).ToUpperInvariant();
+    }
+
+    var waitingWord = "operators are";
+    if (Model.Count == 1)
+    {
+        waitingWord = "operator is";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="sh-adm-page">
+    <div class="sh-status-header sh-adm-header">
+        <div>
+            <h2 class="sh-status-title">Pending Approvals</h2>
+            <span class="sh-status-subtitle">Review farm operators who signed up before they can log in.</span>
+        </div>
+
+        <div class="sh-adm-actions">
+            <a class="sh-back-btn-solid" asp-controller="Admin" asp-action="Index">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (ViewData["PendingApprovalsError"] is string errorMessage)
+    {
+        <div class="sh-flash sh-flash-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>@errorMessage</span>
+        </div>
+    }
+
+    @if (TempData["PendingApprovalsMessage"] is string message && !string.IsNullOrWhiteSpace(message))
+    {
+        <div class="sh-flash" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <span>@message</span>
+        </div>
+    }
+
+    <section class="sh-card sh-adm-card" aria-labelledby="sh-adm-pending-title">
+        <div class="sh-adm-card-head">
+            <h3 class="sh-adm-card-title" id="sh-adm-pending-title">Waiting for review</h3>
+            @if (Model.Count > 0)
+            {
+                <span class="sh-adm-showing">@Model.Count @waitingWord waiting</span>
+            }
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="sh-adm-empty">
+                <span class="sh-adm-empty-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">task_alt</span>
+                </span>
+                <h3 class="sh-adm-empty-title">All caught up</h3>
+                <p class="sh-adm-empty-text">No farm operators are waiting for approval right now.</p>
+            </div>
+        }
+        else
+        {
+            <div class="sh-adm-table-wrap">
+                <table class="sh-adm-table">
+                    <caption class="visually-hidden">Accounts awaiting approval</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Operator</th>
+                            <th scope="col">Starting site</th>
+                            <th scope="col">Requested</th>
+                            <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var account in Model)
+                        {
+                            <tr class="sh-adm-row tone-caution">
+                                <td class="is-lead">
+                                    <div class="sh-adm-person">
+                                        <span class="sh-adm-avatar" aria-hidden="true">@Initial(account)</span>
+                                        <span class="sh-adm-person-text">
+                                            @if (string.IsNullOrWhiteSpace(account.FullName))
+                                            {
+                                                <span class="sh-adm-person-name">@account.Email</span>
+                                                <span class="sh-adm-person-sub">@account.Role</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="sh-adm-person-name">@account.FullName</span>
+                                                <span class="sh-adm-person-sub">@account.Email · @account.Role</span>
+                                            }
+                                        </span>
+                                    </div>
+                                </td>
+                                <td data-label="Starting site">@account.FarmName</td>
+                                <td data-label="Requested" class="is-date">@account.CreatedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm", culture)</td>
+                                <td data-label="Actions" class="sh-adm-col-action">
+                                    <div class="sh-adm-row-actions">
+                                        <form asp-controller="Admin" asp-action="Deny" asp-route-id="@account.Id" method="post">
+                                            <input type="hidden" name="email" value="@account.Email" />
+                                            <button type="submit" class="sh-adm-btn is-danger" title="Deny @account.Email" aria-label="Deny @account.Email">
+                                                <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+                                                Deny
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Admin" asp-action="Approve" asp-route-id="@account.Id" method="post">
+                                            <input type="hidden" name="email" value="@account.Email" />
+                                            <button type="submit" class="sh-primary-btn" title="Approve @account.Email" aria-label="Approve @account.Email">
+                                                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                                                Approve
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>

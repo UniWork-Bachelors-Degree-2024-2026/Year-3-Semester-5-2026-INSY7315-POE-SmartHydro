@@ -1,0 +1,114 @@
+.sh-thr-flash-error {
+    border-color: var(--sh-danger-border);
+    border-left-color: var(--sh-danger-outline);
+    background: var(--sh-danger-soft);
+    color: var(--sh-danger);
+}
+
+.sh-thr-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.1rem;
+    font-size: 0.88rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-thr-card {
+    margin-bottom: 1.25rem;
+    padding: 1.25rem;
+}
+
+.sh-thr-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--sh-border);
+}
+
+.sh-thr-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sh-ink);
+}
+
+.sh-thr-subtitle {
+    font-size: 0.88rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-thr-card .sh-flash {
+    margin: 1rem 0 0;
+}
+
+.sh-thr-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) minmax(0, 11rem) minmax(0, 11rem);
+    align-items: end;
+    gap: 0.5rem 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--sh-border);
+}
+
+.sh-thr-name {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.55rem;
+}
+
+.sh-thr-label {
+    font-weight: 600;
+    color: var(--sh-ink);
+}
+
+.sh-thr-unit {
+    font-size: 0.85rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-thr-field {
+    margin: 0;
+}
+
+.sh-thr-row.has-error .sh-input {
+    border-color: var(--sh-danger-outline);
+}
+
+.sh-thr-row-error {
+    grid-column: 1 / -1;
+}
+
+.sh-thr-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1.1rem;
+}
+
+.sh-thr-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+    .sh-thr-submit .material-symbols-outlined {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+@media (max-width: 600px) {
+    .sh-thr-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sh-thr-name {
+        grid-column: 1 / -1;
+        padding-bottom: 0;
+    }
+
+    .sh-thr-actions .sh-thr-submit {
+        width: 100%;
+    }
+}

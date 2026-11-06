@@ -1,0 +1,93 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    var webAppUrl = Configuration["SmartHydro:WebAppUrl"];
+    if (string.IsNullOrEmpty(webAppUrl))
+    {
+        webAppUrl = "#";
+    }
+
+    var sections = new[]
+    {
+        new { Heading = "", Links = new[] { new { Action = "Index", Title = "Start here", Icon = "home" } } },
+        new { Heading = "First time", Links = new[] { new { Action = "Setup", Title = "Getting set up", Icon = "inventory_2" }, new { Action = "Account", Title = "Your account", Icon = "person" } } },
+        new { Heading = "Help for", Links = new[] { new { Action = "Owners", Title = "Farm owners", Icon = "agriculture" }, new { Action = "Workers", Title = "Farm workers", Icon = "badge" } } },
+        new { Heading = "Stuck?", Links = new[] { new { Action = "Troubleshoot", Title = "Fix a problem", Icon = "build" }, new { Action = "Words", Title = "Words explained", Icon = "menu_book" } } }
+    };
+
+    // Returns the link classes, adding "active" when the link points at the page being shown.
+    string NavClass(string actionName)
+    {
+        var css = "sh-nav-link";
+
+        if (string.Equals(currentAction, actionName, StringComparison.OrdinalIgnoreCase))
+        {
+            css += " active";
+        }
+
+        return css;
+    }
+
+    // Returns "page" for the current page's link so screen readers announce it, or null so the attribute is left out.
+    string? NavCurrent(string actionName)
+    {
+        if (string.Equals(currentAction, actionName, StringComparison.OrdinalIgnoreCase))
+        {
+            return "page";
+        }
+
+        return null;
+    }
+}
+
+<aside class="sh-sidebar" id="sh-sidebar" aria-label="Sidebar">
+
+    <a class="sh-brand" asp-controller="Home" asp-action="Index">
+        <span class="sh-brand-icon">
+            <img src="~/images/logo.png" alt="Smart Hydro logo" />
+        </span>
+
+        <span class="sh-brand-text">
+            <span class="sh-brand-name">Smart Hydro</span>
+            <span class="sh-brand-sub">Help Guide</span>
+        </span>
+    </a>
+
+    <a class="sh-skip-link" href="#sh-main-content">Skip to main content</a>
+
+    <nav class="sh-nav" aria-label="Help topics">
+        @foreach (var navSection in sections)
+        {
+            if (!string.IsNullOrEmpty(navSection.Heading))
+            {
+                <span class="sh-nav-section">@navSection.Heading</span>
+            }
+
+            foreach (var link in navSection.Links)
+            {
+                <a class="@NavClass(link.Action)"
+                   aria-current="@NavCurrent(link.Action)"
+                   aria-label="@link.Title"
+                   asp-controller="Home"
+                   asp-action="@link.Action">
+
+                    <span class="sh-nav-accent"></span>
+
+                    <span class="sh-nav-content">
+                        <span class="material-symbols-outlined" aria-hidden="true">@link.Icon</span>
+                        <span class="sh-nav-text">@link.Title</span>
+                    </span>
+                </a>
+            }
+        }
+    </nav>
+
+    <div class="sh-sidebar-footer">
+        <a class="sh-structure-pill sh-open-app" href="@webAppUrl" target="_blank" rel="noopener" aria-label="Open Smart Hydro in a new tab" title="Open Smart Hydro">
+            <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+            <span class="sh-nav-text">Open Smart Hydro</span>
+        </a>
+    </div>
+
+</aside>

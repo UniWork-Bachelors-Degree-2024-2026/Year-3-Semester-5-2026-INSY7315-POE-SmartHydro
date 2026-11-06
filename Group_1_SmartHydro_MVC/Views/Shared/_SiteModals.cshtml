@@ -1,0 +1,319 @@
+﻿@inject Group_1_SmartHydro_MVC.Services.AdminApiClient AdminApi
+@using Group_1_SmartHydro_MVC.Controllers
+@{
+    var sites = await SiteContext.GetSitesAsync();
+    var current = await SiteContext.GetCurrentAsync();
+    var controllerName = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var isAdmin = User.IsInRole("Admin");
+    var canManage = User.CanManageSites();
+    var onAdminPage = string.Equals(controllerName, "Admin", StringComparison.OrdinalIgnoreCase);
+    var required = current == null && !onAdminPage;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+    var noSitesValue = "false";
+    if (sites.Count == 0 && !SiteContext.SitesLoadFailed)
+    {
+        noSitesValue = "true";
+    }
+
+    var requiredValue = "false";
+    var backdropValue = "true";
+    var keyboardValue = "true";
+    if (required)
+    {
+        requiredValue = "true";
+        backdropValue = "static";
+        keyboardValue = "false";
+    }
+
+    var groups = new List<SiteOwnerGroupViewModel>();
+    if (isAdmin)
+    {
+        groups = sites
+            .Where(s => !string.IsNullOrWhiteSpace(s.OwnerEmail))
+            .GroupBy(s => s.OwnerEmail!.Trim().ToLowerInvariant())
+            .OrderBy(g => g.Key)
+            .Select(g => new SiteOwnerGroupViewModel { OwnerEmail = g.Key, OwnerLabel = g.Key, Sites = g.ToList() })
+            .ToList();
+    }
+    else
+    {
+        groups.Add(new SiteOwnerGroupViewModel { Sites = sites.ToList() });
+    }
+
+    var operators = new List<AdminUser>();
+    if (isAdmin)
+    {
+        var users = await AdminApi.GetUsersAsync(User.GetAccessToken(), Context.RequestAborted);
+        if (users != null)
+        {
+            operators = users
+                .Where(u => u.Role == "Operator" && u.Status == "Approved")
+                .OrderBy(u => u.Email)
+                .ToList();
+        }
+    }
+
+    var emptyText = "You haven't been added to a site yet. Ask your operator to send you an invitation.";
+    if (canManage)
+    {
+        emptyText = "There are no sites yet. Create one below to get started.";
+    }
+    if (SiteContext.SitesLoadFailed)
+    {
+        emptyText = "Your sites couldn't be loaded right now. Check your connection and try again, or sign out and back in.";
+    }
+
+    var pickerIcon = "sensors";
+    var pickerTitle = "Change site";
+    var pickerText = "Switch to another site, edit one, or create a new one.";
+    var showEmptyText = sites.Count == 0;
+    var createTitle = "Create a Site";
+    var createText = "Add a new farm site to manage its own structures.";
+
+    if (required)
+    {
+        pickerTitle = "Select a site";
+        pickerText = "Choose the site you want to work in. You can change it any time from the sidebar.";
+    }
+
+    if (required && sites.Count == 0)
+    {
+        showEmptyText = false;
+        pickerIcon = "add_location_alt";
+        pickerTitle = "No sites yet";
+        pickerText = emptyText;
+
+        if (canManage)
+        {
+            pickerTitle = "Add your first site";
+            pickerText = "There are no sites yet. Add a site to start adding structures, readings and cameras.";
+            createTitle = "Add a Site";
+            createText = "Give it a name and you'll be switched to it straight away.";
+        }
+
+        if (SiteContext.SitesLoadFailed)
+        {
+            pickerIcon = "cloud_off";
+            pickerTitle = "Sites couldn't be loaded";
+            pickerText = emptyText;
+        }
+    }
+}
+
+<div class="modal fade sh-site-modal" id="sh-site-modal" tabindex="-1"
+     aria-labelledby="sh-site-modal-title" aria-describedby="sh-site-modal-text" aria-hidden="true"
+     data-required="@requiredValue" data-no-sites="@noSitesValue" data-bs-backdrop="@backdropValue" data-bs-keyboard="@keyboardValue">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="sh-site-modal-head">
+                <span class="sh-site-modal-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">@pickerIcon</span>
+                </span>
+                <div class="sh-site-modal-heading">
+                    <h2 class="sh-site-modal-title" id="sh-site-modal-title">@pickerTitle</h2>
+                    <p class="sh-site-modal-text" id="sh-site-modal-text">@pickerText</p>
+                </div>
+                @if (!required)
+                {
+                    <button type="button" class="sh-site-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                    </button>
+                }
+                else if (isAdmin)
+                {
+                    <a class="sh-site-modal-close" asp-controller="Admin" asp-action="Index" aria-label="Close and go back to the Admin Dashboard" title="Back to Admin Dashboard">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                    </a>
+                }
+            </div>
+
+            <div class="modal-body sh-site-modal-body" hidden="@(sites.Count == 0 && !showEmptyText)">
+                <form asp-controller="Site" asp-action="Select" method="post" class="sh-site-list" id="sh-site-list">
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                    @if (showEmptyText)
+                    {
+                        <p class="sh-site-empty">@emptyText</p>
+                    }
+                    @foreach (var group in groups)
+                    {
+                        if (isAdmin)
+                        {
+                            <div class="sh-site-group-head">
+                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                                <span class="sh-site-group-name">@group.OwnerLabel</span>
+                                <span class="sh-site-group-count">@group.Sites.Count</span>
+                            </div>
+                        }
+                        foreach (var site in group.Sites)
+                        {
+                            var isCurrent = current != null && current.Id == site.Id;
+                            var rowClass = "sh-site-row";
+                            string? ariaCurrent = null;
+                            if (isCurrent)
+                            {
+                                rowClass = rowClass + " is-current";
+                                ariaCurrent = "true";
+                            }
+                            <div class="@rowClass">
+                                <button type="submit" name="id" value="@site.Id" class="sh-site-option" aria-current="@ariaCurrent">
+                                    <span class="sh-site-option-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined" aria-hidden="true">agriculture</span>
+                                    </span>
+                                    <span class="sh-site-option-text">
+                                        <span class="sh-site-option-name">@site.Name</span>
+                                    </span>
+                                    @if (isCurrent)
+                                    {
+                                        <span class="sh-site-option-badge">Current</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="material-symbols-outlined sh-site-option-chevron" aria-hidden="true">chevron_right</span>
+                                    }
+                                </button>
+                                @if (canManage)
+                                {
+                                    <button type="button" class="sh-site-edit-btn" title="Edit @site.Name" aria-label="Edit @site.Name"
+                                            data-site-id="@site.Id" data-site-name="@site.Name"
+                                            data-site-structures="@site.StructureCount">
+                                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                        <span class="sh-site-edit-label">Edit</span>
+                                    </button>
+                                    <button type="button" class="sh-site-delete-btn" title="Delete @site.Name" aria-label="Delete @site.Name"
+                                            data-site-id="@site.Id" data-site-name="@site.Name"
+                                            data-site-structures="@site.StructureCount">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                        <span class="sh-site-edit-label">Delete</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+                </form>
+            </div>
+
+            @if (canManage)
+            {
+                <div class="sh-site-modal-foot">
+                    <button type="button" class="sh-site-create-btn" id="sh-site-open-create">
+                        <span class="sh-site-create-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                        </span>
+                        <span class="sh-site-create-title">@createTitle</span>
+                        <span class="sh-site-create-text">@createText</span>
+                    </button>
+                </div>
+            }
+
+            @if (required)
+            {
+                @* The picker can't be closed until a site is chosen, so give a way out *@
+                <form method="post" asp-controller="Account" asp-action="Logout" class="sh-site-modal-logout">
+                    <span class="sh-site-logout-who">
+                        Signed in as <strong>@User.GetEmail()</strong>
+                    </span>
+                    <button type="submit" class="sh-site-logout-btn">
+                        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                        Log out
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@if (canManage)
+{
+    <div class="modal fade sh-site-modal" id="sh-site-create-modal" tabindex="-1"
+         aria-labelledby="sh-site-create-title" aria-hidden="true"
+         data-bs-backdrop="@backdropValue" data-bs-keyboard="@keyboardValue">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="Site" asp-action="Create" method="post" id="sh-site-create-form" novalidate
+                      data-create-url="@Url.Action("Create", "Site")" data-edit-url="@Url.Action("Edit", "Site")">
+                    <input type="hidden" name="id" id="sh-site-id" value="" />
+                    <div class="sh-site-modal-head">
+                        <span class="sh-site-modal-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined" id="sh-site-form-icon" aria-hidden="true">add_location_alt</span>
+                        </span>
+                        <div class="sh-site-modal-heading">
+                            <h2 class="sh-site-modal-title" id="sh-site-create-title">Create a site</h2>
+                            <p class="sh-site-modal-text" id="sh-site-create-text">Give your new site a name. You'll be switched to it straight away.</p>
+                        </div>
+                        <button type="button" class="sh-site-modal-close" id="sh-site-create-close" aria-label="Close">
+                            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body sh-site-modal-body sh-site-create-body">
+                        <div class="sh-site-form-error" id="sh-site-form-error" role="alert" hidden></div>
+
+                        <div class="sh-field">
+                            <label class="sh-field-label" for="sh-site-name">Site name</label>
+                            <input type="text" class="sh-input" id="sh-site-name" name="name" required
+                                   maxlength="@SiteController.MaxNameLength" autocomplete="off"
+                                   placeholder="e.g. Emeris NMB" aria-describedby="sh-site-name-error" />
+                            <span class="sh-field-error" id="sh-site-name-error" data-for="name"></span>
+                        </div>
+
+                        @if (isAdmin)
+                        {
+                            <div class="sh-field" id="sh-site-owner-field">
+                                <label class="sh-field-label" for="sh-site-owner">Owner</label>
+                                <select class="sh-input" id="sh-site-owner" name="ownerEmail">
+                                    <option value="">Me (admin)</option>
+                                    @foreach (var op in operators)
+                                    {
+                                        var opLabel = op.Email;
+                                        if (!string.IsNullOrWhiteSpace(op.FullName))
+                                        {
+                                            opLabel = op.FullName + " (" + op.Email + ")";
+                                        }
+                                        <option value="@op.Email">@opLabel</option>
+                                    }
+                                </select>
+                                <span class="sh-field-hint">Choose an operator to give them this site.</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="sh-site-modal-foot sh-site-create-foot">
+                        <button type="button" class="sh-site-secondary-btn" id="sh-site-create-back">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                            Back
+                        </button>
+                        <button type="submit" class="sh-primary-btn sh-site-submit-btn" id="sh-site-create-submit">
+                            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                            <span id="sh-site-submit-label">Create site</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade sh-clear-modal" id="sh-site-delete-modal" tabindex="-1" role="alertdialog"
+         aria-labelledby="sh-site-delete-title" aria-describedby="sh-site-delete-text" aria-hidden="true"
+         data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <form asp-controller="Site" asp-action="Delete" method="post" id="sh-site-delete-form">
+                    <input type="hidden" name="id" id="sh-site-delete-id" value="" />
+                    <div class="modal-body">
+                        <span class="sh-clear-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        </span>
+                        <h2 class="sh-clear-title" id="sh-site-delete-title">Delete this site?</h2>
+                        <p class="sh-clear-text" id="sh-site-delete-text"></p>
+                        <p class="sh-site-delete-error" id="sh-site-delete-error" role="alert" hidden></p>
+                        <div class="sh-clear-buttons">
+                            <button type="button" class="sh-clear-cancel" id="sh-site-delete-cancel">Cancel</button>
+                            <button type="submit" class="sh-clear-confirm" id="sh-site-delete-confirm">Yes, delete</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

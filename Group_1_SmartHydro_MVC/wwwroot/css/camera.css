@@ -1,0 +1,2255 @@
+/* RGBA Color Picker (2026) was used to generate the RGBA colour codes. */
+/* HTML Color Codes (2026) was used to generate all the hex colour codes. */
+.sh-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+    .sh-gallery [hidden] {
+        display: none !important;
+    }
+
+.sh-gallery-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sh-gallery-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    min-width: 9.5rem;
+    padding: 0.65rem 1.4rem;
+    border: 0;
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-ink-fill);
+    color: var(--sh-on-accent);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+    .sh-gallery-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    .sh-gallery-btn:hover {
+        background: var(--sh-ink-fill-hover);
+        color: var(--sh-on-accent);
+    }
+
+
+.sh-gallery-panel {
+    padding: 1.25rem 1.35rem 1.35rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-lg);
+    background: var(--sh-cam-surface);
+}
+
+.sh-gallery-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.sh-gallery-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+}
+
+.sh-gallery-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.95rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: 999px;
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .sh-pill-btn .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+    .sh-pill-btn:hover {
+        border-color: var(--sh-cam-ink);
+    }
+
+    .sh-pill-btn.is-dark {
+        border-color: var(--sh-ink-fill);
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+        .sh-pill-btn.is-dark:hover {
+            background: var(--sh-ink-fill-hover);
+        }
+
+
+.sh-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 2.7rem;
+    padding: 0 0.65rem 0 0.9rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-surface);
+}
+
+    .sh-search:focus-within {
+        border-color: var(--sh-accent);
+        box-shadow: 0 0 0 3px var(--sh-focus-ring-soft);
+    }
+
+.sh-search-icon {
+    font-size: 22px;
+    color: var(--sh-text-soft);
+}
+
+.sh-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 0.88rem;
+    color: var(--sh-text);
+}
+
+    .sh-search-input::placeholder {
+        color: var(--sh-placeholder);
+        opacity: 1;
+    }
+
+    .sh-search-input::-webkit-search-cancel-button {
+        display: none;
+    }
+
+.sh-search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--sh-cam-mint);
+    color: var(--sh-cam-ink);
+    cursor: pointer;
+}
+
+    .sh-search-clear .material-symbols-outlined {
+        font-size: 16px;
+    }
+
+    .sh-search-clear:hover {
+        background: var(--sh-cam-mint-border);
+    }
+
+.sh-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 0.85rem 0 1rem;
+}
+
+.sh-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.32rem 0.85rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: 999px;
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .sh-chip .material-symbols-outlined {
+        font-size: 17px;
+    }
+
+    .sh-chip:hover {
+        border-color: var(--sh-cam-ink);
+    }
+
+    .sh-chip.is-active {
+        border-color: var(--sh-ink-fill);
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+.sh-menu {
+    min-width: 11rem;
+    padding: 0.35rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    font-size: 0.8rem;
+}
+
+    .sh-menu .dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 6px;
+        padding: 0.4rem 0.65rem;
+        color: var(--sh-text);
+    }
+
+        .sh-menu .dropdown-item:hover,
+        .sh-menu .dropdown-item:focus {
+            background: var(--sh-cam-surface);
+            color: var(--sh-cam-ink);
+        }
+
+        .sh-menu .dropdown-item.active,
+        .sh-menu .dropdown-item:active {
+            background: var(--sh-cam-mint);
+            color: var(--sh-cam-ink);
+            font-weight: 600;
+        }
+
+            .sh-menu .dropdown-item.active::after {
+                content: "\2713";
+                margin-left: 0.75rem;
+            }
+
+.sh-month-menu {
+    min-width: 13rem;
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.sh-year-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.2rem 0.3rem 0.5rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--sh-cam-border);
+}
+
+.sh-year-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+}
+
+.sh-year-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: 6px;
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+    cursor: pointer;
+}
+
+    .sh-year-btn .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+    .sh-year-btn:hover {
+        border-color: var(--sh-cam-ink);
+    }
+
+.sh-menu-note {
+    margin-left: auto;
+    padding-left: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--sh-text-muted);
+}
+
+.sh-results-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+    font-size: 0.75rem;
+    color: var(--sh-cam-ink);
+}
+
+    .sh-results-head span {
+        color: var(--sh-text-muted);
+    }
+
+.sh-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+    max-height: 26rem;
+    overflow-y: auto;
+    padding: 0.15rem 0.5rem 0.4rem 0.15rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--sh-scrollbar) transparent;
+}
+
+/* Recent result card: the photo sits inset inside a white card with its own rounded corners, and the title and time sit underneath. */
+.sh-capture-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.55rem 0.55rem 0.85rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-lg);
+    background: var(--sh-card-bg);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+    .sh-capture-card:hover {
+        border-color: var(--sh-cam-mint-border);
+        box-shadow: 0 6px 18px rgba(32, 76, 44, 0.12);
+        transform: translateY(-1px);
+    }
+
+    .sh-capture-card:focus-visible {
+        outline: 2px solid var(--sh-cam-ink);
+        outline-offset: 2px;
+    }
+
+.sh-capture-thumb {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Mozilla Developer (2026b) documents aspect-ratio, used so every thumbnail has the same shape whatever the photo size. */
+    aspect-ratio: 5 / 2;
+    overflow: hidden;
+    border-radius: var(--sh-radius);
+    background: var(--sh-cam-mint);
+    color: var(--sh-thumb-icon);
+}
+
+.sh-capture-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-width: 0;
+    padding: 0 0.45rem;
+}
+
+.sh-capture-placeholder-icon {
+    font-size: 30px;
+}
+
+.sh-capture-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+}
+
+.sh-capture-card:hover .sh-capture-img {
+    transform: scale(1.03);
+}
+
+.sh-capture-fav {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--sh-surface);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    color: var(--sh-structure-caution);
+}
+
+    .sh-capture-fav .material-symbols-outlined {
+        font-size: 14px;
+    }
+
+.sh-capture-title {
+    overflow: hidden;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sh-capture-meta {
+    font-size: 0.76rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-results-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1.2rem 0.5rem;
+    font-size: 0.85rem;
+    text-align: center;
+    color: var(--sh-text-muted);
+}
+
+.sh-cal-nav {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.sh-cal-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.3rem;
+    padding: 0;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+    cursor: pointer;
+}
+
+    .sh-cal-arrow:hover:not(:disabled) {
+        border-color: var(--sh-cam-ink);
+    }
+
+    .sh-cal-arrow:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+.sh-cal-heading {
+    text-align: center;
+}
+
+.sh-cal-month {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+}
+
+.sh-cal-sub {
+    font-size: 0.72rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-cal-weekdays,
+.sh-cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.sh-cal-weekdays {
+    margin-bottom: 0.5rem;
+}
+
+    .sh-cal-weekdays span {
+        padding: 0.35rem 0;
+        border: 1px solid var(--sh-cam-border);
+        border-radius: var(--sh-radius-sm);
+        background: var(--sh-card-bg);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-align: center;
+        color: var(--sh-cam-ink);
+    }
+
+.sh-cal-day {
+    height: 2.7rem;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-card-bg);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+}
+
+    .sh-cal-day:hover {
+        border-color: var(--sh-cam-ink);
+    }
+
+    .sh-cal-day.is-outside {
+        color: var(--sh-text-muted);
+    }
+
+    .sh-cal-day.has-captures {
+        position: relative;
+        border-color: var(--sh-cam-mint-border);
+        background: var(--sh-cam-mint);
+        font-weight: 700;
+    }
+
+        .sh-cal-day.has-captures::after {
+            content: "";
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            margin-left: -2.5px;
+            border-radius: 50%;
+            background: var(--sh-structure-good);
+        }
+
+        .sh-cal-day.has-captures:hover {
+            border-color: var(--sh-cam-ink);
+        }
+
+    .sh-cal-day.is-today {
+        box-shadow: inset 0 0 0 2px var(--sh-cam-ink);
+    }
+
+    .sh-cal-day.is-selected {
+        border-color: var(--sh-ink-fill);
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+        .sh-cal-day.is-selected::after {
+            background: var(--sh-on-accent);
+        }
+
+
+/* ---------- Shared look for every pop-up on the camera pages ---------- */
+
+/* Darker, green-tinted backdrop with a light blur so the pop-up stands out. */
+.modal-backdrop {
+    --bs-backdrop-bg: #0f2016;
+    --bs-backdrop-opacity: 0.45;
+}
+
+.sh-add-modal .modal-content,
+.sh-capture-modal .modal-content,
+.sh-confirm-modal .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgba(15, 32, 22, 0.28), 0 4px 12px rgba(15, 32, 22, 0.08);
+}
+
+/* Pop-ups ease in with a small rise and scale instead of sliding down from the top. */
+.sh-add-modal.fade .modal-dialog,
+.sh-capture-modal.fade .modal-dialog,
+.sh-confirm-modal.fade .modal-dialog {
+    transform: translateY(14px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sh-add-modal.show .modal-dialog,
+.sh-capture-modal.show .modal-dialog,
+.sh-confirm-modal.show .modal-dialog {
+    transform: none;
+}
+
+.sh-add-modal .modal-header,
+.sh-capture-modal .modal-header {
+    align-items: center;
+    gap: 1rem;
+    padding: 1.15rem 1.4rem;
+    border-bottom: 1px solid var(--sh-cam-border);
+}
+
+.sh-add-modal .modal-body {
+    padding: 1.25rem 1.4rem 1.4rem;
+}
+
+/* Round close button with a soft grey circle on hover. */
+.sh-add-modal .btn-close,
+.sh-capture-modal .btn-close {
+    --bs-btn-close-bg: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 0 0 auto;
+    padding: 0;
+    border-radius: 50%;
+    color: var(--sh-text);
+    font-size: 1.05rem;
+    line-height: 1;
+    filter: none;
+    opacity: 0.55;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+    .sh-add-modal .btn-close:hover,
+    .sh-capture-modal .btn-close:hover {
+        background-color: var(--sh-surface-muted);
+        opacity: 1;
+    }
+
+.sh-modal-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.sh-modal-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 12px;
+    background: var(--sh-cam-mint);
+    color: var(--sh-cam-ink);
+}
+
+    .sh-modal-icon .material-symbols-outlined {
+        font-size: 22px;
+    }
+
+.sh-modal-heading-text {
+    min-width: 0;
+}
+
+.sh-add-modal .modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--sh-cam-ink);
+}
+
+.sh-modal-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: var(--sh-text-muted);
+}
+
+/* Button row at the bottom of a form pop-up, set apart by a thin line. */
+.sh-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin: 1.25rem -1.4rem -1.4rem;
+    padding: 1rem 1.4rem;
+    border-top: 1px solid var(--sh-cam-border);
+    background: var(--sh-cam-surface);
+}
+
+.sh-save-actions {
+    justify-content: flex-end;
+}
+
+.sh-capture-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+    padding-left: 1rem;
+}
+
+    .sh-capture-header-actions .btn-close {
+        margin: 0;
+    }
+
+/* Favorite toggle in the photo viewer header: outlined star when off, filled star on a light green pill when on. */
+.sh-fav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem 0.4rem 0.7rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: 999px;
+    background: var(--sh-surface);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+    .sh-fav-toggle .material-symbols-outlined {
+        font-size: 19px;
+        color: var(--sh-text-muted);
+    }
+
+    .sh-fav-toggle:hover {
+        border-color: var(--sh-cam-mint-border);
+        background: var(--sh-cam-surface);
+    }
+
+    .sh-fav-toggle.is-active {
+        border-color: var(--sh-cam-mint-border);
+        background: var(--sh-cam-mint);
+    }
+
+        .sh-fav-toggle.is-active .material-symbols-outlined {
+            color: var(--sh-cam-ink);
+        }
+
+    .sh-fav-toggle:disabled {
+        cursor: progress;
+        opacity: 0.8;
+    }
+
+.sh-capture-heading {
+    min-width: 0;
+}
+
+.sh-capture-taken {
+    margin: 0.2rem 0 0;
+    overflow: hidden;
+    font-size: 0.82rem;
+    color: var(--sh-text-muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sh-capture-modal .modal-title {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sh-capture-modal .modal-body {
+    padding: 1.25rem 1.4rem 0;
+}
+
+.sh-capture-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 18rem;
+    margin-bottom: 1.1rem;
+    overflow: hidden;
+    border-radius: var(--sh-radius);
+    background: var(--sh-cam-mint);
+    color: var(--sh-thumb-icon);
+}
+
+    .sh-capture-preview .material-symbols-outlined {
+        font-size: 96px;
+    }
+
+.sh-capture-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Photo viewer: the whole photo is shown (object-fit: contain) and a blurred copy fills the empty space around it, so tall and wide photos both fit neatly. */
+.sh-capture-modal .sh-capture-preview {
+    position: relative;
+    isolation: isolate;
+    height: auto;
+    min-height: 12rem;
+    margin-bottom: 1rem;
+}
+
+    .sh-capture-modal .sh-capture-preview.has-image {
+        background: #1f2a22;
+    }
+
+.sh-capture-preview-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Mozilla Developer (2026c) documents the filter property and its blur() function. */
+    filter: blur(28px) saturate(1.15);
+    transform: scale(1.2);
+    opacity: 0.6;
+}
+
+.sh-capture-modal .sh-capture-preview-img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(48vh, 26rem);
+    /* Mozilla Developer (2026d) documents object-fit: contain, which scales the image to fit without cropping it. */
+    object-fit: contain;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    transition: opacity 0.2s ease;
+}
+
+.sh-capture-preview.is-loading .sh-capture-preview-img {
+    opacity: 0;
+}
+
+.sh-capture-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+    padding: 0.9rem 1.4rem;
+    border-top: 1px solid var(--sh-cam-border);
+    background: var(--sh-cam-surface);
+}
+
+    .sh-capture-footer > * {
+        margin: 0;
+    }
+
+/* Thin vertical lines that separate Delete, Edit and Download. */
+.sh-capture-divider {
+    width: 1px;
+    height: 1.75rem;
+    background: var(--sh-cam-border);
+}
+
+.sh-capture-details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-cam-surface);
+}
+
+    .sh-capture-details > div {
+        min-width: 0;
+        padding: 0.75rem 1rem;
+    }
+
+        .sh-capture-details > div + div {
+            border-left: 1px solid var(--sh-cam-border);
+        }
+
+    .sh-capture-details dt {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-bottom: 0.2rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--sh-text-muted);
+    }
+
+        .sh-capture-details dt .material-symbols-outlined {
+            font-size: 15px;
+        }
+
+    .sh-capture-details dd {
+        overflow: hidden;
+        margin: 0;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--sh-text);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+@media (max-width: 575.98px) {
+    .sh-capture-details {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+        .sh-capture-details > div + div {
+            border-left: 0;
+        }
+
+        .sh-capture-details > div:nth-child(even) {
+            border-left: 1px solid var(--sh-cam-border);
+        }
+
+        .sh-capture-details > div:nth-child(n + 3) {
+            border-top: 1px solid var(--sh-cam-border);
+        }
+
+    .sh-capture-footer {
+        flex-wrap: wrap;
+    }
+}
+
+/* "Are you sure?" delete popup. It opens over the photo viewer, so it and its backdrop sit one layer higher than Bootstrap's default modal. */
+.sh-confirm-modal {
+    z-index: 1075;
+}
+
+.modal-backdrop.sh-confirm-backdrop {
+    z-index: 1070;
+    --bs-backdrop-opacity: 0;
+}
+
+.sh-confirm-modal .modal-content {
+    box-shadow: 0 24px 64px rgba(15, 32, 22, 0.4), 0 0 0 1px rgba(15, 32, 22, 0.08);
+}
+
+.sh-confirm-modal .modal-body {
+    padding: 1.6rem 1.5rem 1.35rem;
+    text-align: center;
+}
+
+.sh-confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 0.85rem;
+    border-radius: 50%;
+    background: var(--sh-danger-soft);
+    color: var(--sh-danger);
+}
+
+    .sh-confirm-icon .material-symbols-outlined {
+        font-size: 28px;
+    }
+
+.sh-confirm-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sh-text);
+}
+
+.sh-confirm-text {
+    margin: 0 0 1.3rem;
+    font-size: 0.86rem;
+    color: var(--sh-text);
+    overflow-wrap: anywhere;
+}
+
+    .sh-confirm-text strong {
+        font-weight: 700;
+    }
+
+.sh-confirm-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+/* Toast messages: a soft white card with a coloured icon bubble that slides up into view. */
+.sh-toast {
+    --sh-toast-tint: var(--sh-cam-mint);
+    --sh-toast-colour: var(--sh-structure-good);
+    width: auto;
+    min-width: 16rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+    overflow: hidden;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: 1.4rem;
+    background: var(--sh-card-bg);
+    box-shadow: 0 10px 28px rgba(32, 76, 44, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06);
+    color: var(--sh-text);
+    font-size: 0.86rem;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+
+    .sh-toast.fade:not(.show) {
+        transform: translateY(12px) scale(0.96);
+    }
+
+    .sh-toast.is-error {
+        --sh-toast-tint: var(--sh-danger-soft);
+        --sh-toast-colour: var(--sh-danger);
+        border-color: var(--sh-danger-border);
+    }
+
+    .sh-toast.is-favourite {
+        --sh-toast-tint: var(--sh-warn-soft);
+        --sh-toast-colour: var(--sh-structure-caution);
+    }
+
+    .sh-toast.is-unfavourite {
+        --sh-toast-tint: var(--sh-surface-muted);
+        --sh-toast-colour: var(--sh-text-muted);
+    }
+
+.sh-toast-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.5rem;
+}
+
+.sh-toast-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--sh-toast-tint);
+    color: var(--sh-toast-colour);
+}
+
+    .sh-toast-icon .material-symbols-outlined {
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+.sh-toast .toast-body {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    font-weight: 600;
+}
+
+.sh-toast-close {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--sh-text-muted);
+    cursor: pointer;
+}
+
+    .sh-toast-close .material-symbols-outlined {
+        font-size: 17px;
+    }
+
+    .sh-toast-close:hover {
+        background: var(--sh-surface-muted);
+        color: var(--sh-text);
+    }
+
+.sh-toast-link {
+    margin-left: 0.5rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+    .sh-toast-link:hover {
+        color: var(--sh-ink-strong);
+    }
+
+.sh-add-modal [hidden],
+.sh-capture-modal [hidden],
+.sh-live [hidden] {
+    display: none !important;
+}
+
+/* Options on the first step of "Add a photo": full-width rows with an icon, text and an arrow. */
+.sh-add-options {
+    display: grid;
+    grid-auto-rows: 1fr;
+    gap: 0.7rem;
+}
+
+.sh-add-option {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .sh-add-option:hover {
+        border-color: var(--sh-cam-mint-border);
+        background: var(--sh-cam-surface);
+        box-shadow: 0 4px 14px rgba(32, 76, 44, 0.08);
+        color: var(--sh-cam-ink);
+    }
+
+.sh-add-option-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--sh-radius);
+    background: var(--sh-cam-mint);
+}
+
+    .sh-add-option-icon .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+.sh-add-option-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.sh-add-option-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.sh-add-option-text {
+    font-size: 0.78rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-add-option-arrow {
+    flex-shrink: 0;
+    font-size: 22px;
+    color: var(--sh-text-muted);
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.sh-add-option:hover .sh-add-option-arrow {
+    transform: translateX(3px);
+    color: var(--sh-cam-ink);
+}
+
+.sh-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 11rem;
+    padding: 1.2rem;
+    overflow: hidden;
+    border: 2px dashed var(--sh-cam-mint-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-cam-surface);
+    text-align: center;
+    cursor: pointer;
+}
+
+    .sh-dropzone:hover,
+    .sh-dropzone.is-over {
+        border-color: var(--sh-cam-ink);
+        background: var(--sh-mint);
+    }
+
+    .sh-dropzone:focus-within {
+        outline: 2px solid var(--sh-accent);
+        outline-offset: 2px;
+    }
+
+    .sh-dropzone.has-file .sh-dropzone-icon,
+    .sh-dropzone.has-file .sh-dropzone-hint {
+        display: none;
+    }
+
+.sh-dropzone-icon {
+    font-size: 38px;
+    color: var(--sh-structure-good);
+}
+
+.sh-dropzone-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--sh-cam-ink);
+    word-break: break-word;
+}
+
+.sh-dropzone-hint {
+    font-size: 0.74rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-dropzone-preview {
+    max-width: 100%;
+    max-height: 9rem;
+    margin-bottom: 0.4rem;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+.sh-add-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+
+.sh-add-field-full {
+    grid-column: 1 / -1;
+}
+
+.sh-add-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+}
+
+    .sh-add-label span {
+        font-weight: 400;
+        color: var(--sh-text-muted);
+    }
+
+/* "Add to favorites" row on the upload and save forms: a real checkbox shown as a full-width row with a switch, styled like the other inputs. */
+.sh-fav-check {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+    .sh-fav-check:hover {
+        border-color: var(--sh-cam-mint-border);
+        background: var(--sh-cam-surface);
+    }
+
+    /* Mozilla Developer (2026e) documents the :has() selector, used to style the row from its checkbox's state. */
+    .sh-fav-check:has(input:focus-visible) {
+        outline: 2px solid var(--sh-cam-ink);
+        outline-offset: 2px;
+    }
+
+.sh-fav-check-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--sh-cam-mint);
+    color: var(--sh-cam-ink);
+    transition: color 0.15s ease;
+}
+
+    .sh-fav-check-icon .material-symbols-outlined {
+        font-size: 19px;
+    }
+
+.sh-fav-check-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.sh-fav-check-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+}
+
+.sh-fav-check-hint {
+    font-size: 0.74rem;
+    color: var(--sh-text-muted);
+}
+
+/* On/off switch drawn with CSS; the knob slides right and the track turns green when ticked. */
+.sh-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    background: var(--sh-toggle-track);
+    transition: background 0.2s ease;
+}
+
+    .sh-switch::after {
+        content: "";
+        position: absolute;
+        top: 0.175rem;
+        left: 0.175rem;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: var(--sh-toggle-knob);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease;
+    }
+
+.sh-fav-check:has(input:checked) .sh-switch {
+    background: var(--sh-ink-fill);
+}
+
+    .sh-fav-check:has(input:checked) .sh-switch::after {
+        transform: translateX(1.05rem);
+    }
+
+.sh-fav-check:has(input:checked) .sh-fav-check-icon .material-symbols-outlined {
+    font-variation-settings: 'opsz' 24, 'wght' 400, 'FILL' 1, 'GRAD' 0;
+}
+
+.sh-add-modal .form-control,
+.sh-add-modal .form-select {
+    border-color: var(--sh-cam-border);
+    border-radius: var(--sh-radius-sm);
+    font-size: 0.85rem;
+}
+
+    .sh-add-modal .form-control:focus,
+    .sh-add-modal .form-select:focus {
+        border-color: var(--sh-accent);
+        box-shadow: 0 0 0 3px var(--sh-focus-ring-soft);
+    }
+
+.sh-date-field {
+    position: relative;
+}
+
+.sh-date-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+    .sh-date-trigger:hover {
+        border-color: var(--sh-cam-ink);
+    }
+
+    .sh-date-field.is-open .sh-date-trigger,
+    .sh-date-trigger:focus-visible {
+        border-color: var(--sh-accent);
+        box-shadow: 0 0 0 3px var(--sh-focus-ring-soft);
+        outline: none;
+    }
+
+    .sh-date-trigger .material-symbols-outlined {
+        font-size: 20px;
+        color: var(--sh-structure-good);
+    }
+
+.sh-date-trigger-text.is-placeholder {
+    font-weight: 400;
+    color: var(--sh-text-muted);
+}
+
+.sh-date-popover {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.85rem 1rem 0.7rem;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius);
+    background: var(--sh-card-bg);
+    box-shadow: 0 8px 20px rgba(20, 40, 26, 0.1);
+}
+
+    .sh-date-popover .sh-cal-nav {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        margin-bottom: 0.4rem;
+    }
+
+    .sh-date-popover .sh-cal-arrow {
+        width: 1.8rem;
+        height: 1.8rem;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+    }
+
+        .sh-date-popover .sh-cal-arrow:hover:not(:disabled) {
+            background: var(--sh-cam-mint);
+        }
+
+    .sh-date-popover .sh-cal-month {
+        font-size: 0.9rem;
+    }
+
+    .sh-date-popover .sh-cal-weekdays {
+        margin-bottom: 0.25rem;
+        gap: 0.2rem;
+    }
+
+        .sh-date-popover .sh-cal-weekdays span {
+            padding: 0;
+            border: 0;
+            background: none;
+            font-size: 0.66rem;
+            font-weight: 600;
+            color: var(--sh-text-muted);
+        }
+
+    .sh-date-popover .sh-cal-days {
+        gap: 0.2rem;
+    }
+
+    .sh-date-popover .sh-cal-day {
+        height: 2.1rem;
+        border: 0;
+        border-radius: var(--sh-radius-sm);
+        background: transparent;
+        font-size: 0.74rem;
+        font-weight: 500;
+    }
+
+        .sh-date-popover .sh-cal-day:hover:not(:disabled):not(.is-selected) {
+            background: var(--sh-cam-mint);
+        }
+
+        .sh-date-popover .sh-cal-day.is-outside {
+            opacity: 0.45;
+        }
+
+        .sh-date-popover .sh-cal-day.is-today {
+            box-shadow: inset 0 0 0 1px var(--sh-cam-ink);
+            font-weight: 700;
+        }
+
+        .sh-date-popover .sh-cal-day.is-selected {
+            box-shadow: none;
+            background: var(--sh-ink-fill);
+            font-weight: 700;
+            color: var(--sh-on-accent);
+        }
+
+        .sh-date-popover .sh-cal-day:disabled,
+        .sh-date-popover .sh-cal-day.is-disabled {
+            opacity: 0.28;
+            cursor: not-allowed;
+        }
+
+.sh-add-error {
+    margin: 0 0 0.8rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sh-danger-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-danger-soft);
+    font-size: 0.8rem;
+    color: var(--sh-danger);
+}
+
+.sh-add-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+.sh-live {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+}
+
+.sh-live-stage {
+    position: relative;
+    width: 100%;
+    min-height: 20rem;
+    max-height: calc(100vh - 11rem);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--sh-radius-lg);
+    background: #161d18;
+}
+
+.sh-live-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #101612;
+    image-rendering: -webkit-optimize-contrast;
+    filter: contrast(1.03) saturate(1.04);
+}
+
+.sh-live-badge,
+.sh-live-info,
+.sh-live-sensors {
+    position: absolute;
+    z-index: 2;
+    border-radius: 6px;
+    background: rgba(22, 29, 24, 0.78);
+    color: #fff;
+    font-size: 0.7rem;
+}
+
+.sh-live-badge {
+    top: 0.9rem;
+    left: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.sh-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #8b948d;
+}
+
+.sh-live-stage[data-state="live"] .sh-live-dot {
+    background: var(--sh-red);
+    /* Mozilla Developer (2026a) demonstrates the CSS animation shorthand property. */
+    animation: sh-live-pulse 1.6s ease-in-out infinite;
+}
+
+.sh-live-info {
+    top: 0.9rem;
+    right: 0.9rem;
+    padding: 0.45rem 0.7rem;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.sh-live-code {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.sh-live-time {
+    color: #d5dcd7;
+    font-size: 0.68rem;
+}
+
+.sh-live-sensors {
+    left: 0.9rem;
+    bottom: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    max-width: calc(50% - 3.4rem);
+    padding: 0.3rem 0.7rem;
+}
+
+.sh-live-sensor-dot {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #8b948d;
+}
+
+    .sh-live-sensor-dot.is-online {
+        background: #3ecf7a;
+    }
+
+.sh-live-message {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    background: rgba(22, 29, 24, 0.92);
+    color: #fff;
+    text-align: center;
+}
+
+    .sh-live-message .material-symbols-outlined {
+        font-size: 42px;
+        opacity: 0.85;
+    }
+
+    .sh-live-message p {
+        max-width: 24rem;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+.sh-live-retry {
+    margin-top: 0.4rem;
+    min-width: 8rem;
+}
+
+.sh-shutter {
+    position: absolute;
+    left: 50%;
+    bottom: 1.1rem;
+    z-index: 2;
+    width: 4.2rem;
+    height: 4.2rem;
+    padding: 4px;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    background: transparent;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+
+    .sh-shutter span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.12s ease;
+    }
+
+    .sh-shutter:active:not(:disabled) span {
+        transform: scale(0.86);
+    }
+
+    .sh-shutter:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+.sh-live-stage.is-flash::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: #fff;
+    pointer-events: none;
+    animation: sh-live-flash 0.22s ease-out forwards;
+}
+
+@keyframes sh-live-flash {
+    from {
+        opacity: 0.85;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes sh-live-pulse {
+    50% {
+        opacity: 0.35;
+    }
+}
+
+.sh-live-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    width: 100%;
+}
+
+img.sh-live-video {
+    object-fit: contain;
+    background: #161d18;
+}
+
+.sh-live-stage:not([data-state="live"]) img.sh-live-video {
+    visibility: hidden;
+}
+
+.sh-live-stage[data-state="off"] .sh-live-dot {
+    background: #9aa59d;
+}
+
+
+.sh-btn-outline,
+.sh-btn-danger-outline,
+.sh-btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--sh-radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .sh-btn-outline .material-symbols-outlined,
+    .sh-btn-danger-outline .material-symbols-outlined {
+        font-size: 19px;
+    }
+
+    .sh-btn-outline:disabled,
+    .sh-btn-danger:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.sh-btn-outline {
+    border: 1px solid var(--sh-cam-border);
+    background: var(--sh-surface);
+    color: var(--sh-cam-ink);
+}
+
+    .sh-btn-outline:hover:not(:disabled) {
+        background: var(--sh-cam-surface);
+    }
+
+.sh-btn-danger-outline {
+    border: 1.5px solid var(--sh-danger-outline);
+    background: var(--sh-danger-outline-bg);
+    color: var(--sh-danger);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+    .sh-btn-danger-outline:hover {
+        border-color: var(--sh-danger-fill);
+        background: var(--sh-danger-fill);
+        color: var(--sh-on-accent);
+    }
+
+.sh-btn-edit-outline {
+    border: 1.5px solid var(--sh-structure-good);
+    color: var(--sh-structure-good-text);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+    .sh-btn-edit-outline:hover:not(:disabled) {
+        border-color: var(--sh-structure-good);
+        background: var(--sh-structure-good);
+        color: var(--sh-on-accent);
+    }
+
+.sh-btn-danger {
+    border: 1px solid var(--sh-danger-fill);
+    background: var(--sh-danger-fill);
+    color: var(--sh-on-accent);
+}
+
+    .sh-btn-danger:hover:not(:disabled) {
+        border-color: var(--sh-danger-fill-hover);
+        background: var(--sh-danger-fill-hover);
+    }
+
+
+.sh-save-modal .sh-capture-preview {
+    height: 14rem;
+}
+
+.sh-save-modal .sh-capture-preview-img {
+    object-fit: contain;
+}
+
+.sh-save-modal .sh-gallery-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sh-gallery button:focus-visible,
+.sh-live button:focus-visible,
+.sh-live a:focus-visible,
+.sh-add-option:focus-visible,
+.sh-results:focus-visible,
+.sh-capture-modal button:focus-visible,
+.sh-capture-card:focus-visible,
+.sh-capture-modal a:focus-visible,
+.sh-save-modal button:focus-visible {
+    outline: 2px solid var(--sh-accent);
+    outline-offset: 2px;
+}
+
+
+@media (max-width: 767.98px) {
+    .sh-capture-details {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+        .sh-capture-details dd {
+            white-space: normal;
+        }
+}
+
+@media (max-width: 575.98px) {
+    .sh-gallery-panel {
+        padding: 1rem;
+    }
+
+    .sh-add-options,
+    .sh-add-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sh-live-stage {
+        min-height: 24rem;
+        aspect-ratio: 3 / 4;
+    }
+
+    .sh-results {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+    }
+
+    .sh-cal-weekdays,
+    .sh-cal-days {
+        gap: 0.3rem;
+    }
+
+    .sh-cal-day {
+        height: 2.3rem;
+        font-size: 0.72rem;
+    }
+
+    .sh-capture-preview {
+        height: 12rem;
+    }
+
+    .sh-capture-modal .sh-capture-preview-img {
+        max-height: 45vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sh-capture-modal .sh-capture-preview-img {
+        transition: none;
+    }
+}
+
+
+
+/* ---------- Edit photo pop-up (opens over the photo viewer and copies the "Add a photo" look) ---------- */
+.sh-edit-modal {
+    z-index: 1075;
+}
+
+    .sh-edit-modal .modal-dialog {
+        max-width: min(31.25rem, calc(100vw - 1rem));
+    }
+
+    .sh-edit-modal .modal-content {
+        max-width: 100%;
+    }
+
+    .sh-edit-modal .sh-capture-preview {
+        position: relative;
+        height: clamp(9rem, 28vh, 14rem);
+        margin-bottom: 0.75rem;
+    }
+
+    .sh-edit-modal .sh-capture-preview-img {
+        object-fit: contain;
+    }
+
+.sh-edit-new-badge {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--sh-ink-fill);
+    color: var(--sh-on-accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.sh-edit-change {
+    width: 100%;
+}
+
+    .sh-edit-change:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.sh-edit-modal .sh-add-fields {
+    margin: 1rem 0 0;
+}
+
+.sh-edit-modal .sh-add-error {
+    margin-top: 0.8rem;
+}
+
+.sh-edit-modal .sh-add-submit:disabled,
+.sh-edit-modal .sh-btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sh-edit-modal .sh-add-options + .sh-modal-actions,
+.sh-edit-modal .sh-dropzone + .sh-add-error + .sh-modal-actions,
+.sh-edit-modal .sh-edit-cam + .sh-modal-actions {
+    margin-top: 1.25rem;
+}
+
+.sh-edit-modal .sh-dropzone {
+    min-height: clamp(9rem, 24vh, 11rem);
+}
+
+.sh-edit-cam {
+    position: relative;
+    width: 100%;
+    min-height: 11rem;
+    max-height: min(55vh, 26rem);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--sh-radius);
+    background: #161d18;
+}
+
+.sh-edit-cam-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sh-edit-cam .sh-live-message {
+    padding: 1rem;
+}
+
+    .sh-edit-cam .sh-live-message p {
+        font-size: 0.85rem;
+    }
+
+.sh-edit-cam .sh-shutter {
+    bottom: 0.8rem;
+    width: 3.6rem;
+    height: 3.6rem;
+}
+
+.sh-edit-cam.is-flash::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: #fff;
+    pointer-events: none;
+    animation: sh-live-flash 0.22s ease-out forwards;
+}
+
+.sh-edit-modal button:focus-visible,
+.sh-edit-modal .sh-dropzone:focus-within {
+    outline: 2px solid var(--sh-accent);
+    outline-offset: 2px;
+}
+
+.sh-edit-actions,
+.sh-edit-modal .sh-modal-actions {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 575.98px) {
+    .sh-edit-modal .modal-header {
+        padding: 1rem 1.1rem;
+    }
+
+    .sh-edit-modal .modal-body {
+        padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .sh-edit-modal .sh-modal-actions {
+        margin: 1.1rem -1.1rem -1.1rem;
+        padding: 0.9rem 1.1rem;
+    }
+
+        .sh-edit-modal .sh-modal-actions > * {
+            flex: 1 1 8rem;
+        }
+
+    .sh-edit-modal .sh-modal-sub {
+        font-size: 0.76rem;
+    }
+
+    .sh-capture-footer > .sh-btn-outline,
+    .sh-capture-footer > .sh-btn-danger-outline,
+    .sh-capture-footer > .sh-capture-download {
+        flex: 1 1 8rem;
+    }
+
+    .sh-capture-divider {
+        display: none;
+    }
+}
+
+@media (max-height: 520px) {
+    .sh-edit-modal .sh-capture-preview {
+        height: 7.5rem;
+    }
+
+    .sh-edit-cam {
+        max-height: 60vh;
+        min-height: 9rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sh-edit-cam.is-flash::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+/*
+    Reference List:
+    HTML Color Codes, 2026. HTML Color Codes. [online] Available at: <https://htmlcolorcodes.com/> [Accessed 22 September 2026].
+    Mozilla Developer, 2026a. animation CSS property. [online] Available at: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/animation> [Accessed 22 September 2026]. 
+    Mozilla Developer, 2026b. aspect-ratio CSS property. [online] Available at: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/aspect-ratio> [Accessed 22 September 2026].
+    Mozilla Developer, 2026c. filter CSS property. [online] Available at: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/filter> [Accessed 22 September 2026].
+    Mozilla Developer, 2026d. object-fit CSS property. [online] Available at: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/object-fit> [Accessed 22 September 2026].
+    Mozilla Developer, 2026e. :has() CSS pseudo-class. [online] Available at: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:has> [Accessed 22 September 2026].
+    RGBA Color Picker, 2026. RGBA Color Picker. [online] Available at: <https://rgbacolorpicker.com/> [Accessed 22 September 2026]. 
+*/
+
+/* Keep camera controls and modal content usable on very narrow screens without
+   changing their existing visual treatment. */
+.sh-gallery,
+.sh-gallery-panel,
+.sh-gallery-panel-head,
+.sh-results,
+.sh-capture-card,
+.sh-capture-header-actions,
+.sh-modal-actions,
+.sh-confirm-buttons,
+.sh-add-options,
+.sh-capture-details,
+.sh-capture-heading {
+    min-width: 0;
+}
+
+    .sh-gallery-panel-head > *,
+    .sh-capture-header-actions > *,
+    .sh-modal-actions > *,
+    .sh-confirm-buttons > * {
+        max-width: 100%;
+    }
+
+.sh-gallery-btn,
+.sh-pill-btn,
+.sh-btn-outline,
+.sh-add-option,
+.sh-fav-toggle {
+    max-width: 100%;
+}
+
+@media (max-width: 575.98px) {
+    .sh-gallery-actions {
+        width: 100%;
+    }
+
+        .sh-gallery-actions .sh-gallery-btn {
+            width: 100%;
+        }
+
+    .sh-gallery-panel-head {
+        flex-wrap: wrap;
+    }
+
+    .sh-capture-header-actions {
+        flex-wrap: wrap;
+    }
+
+        .sh-capture-header-actions .sh-fav-toggle {
+            min-width: 0;
+        }
+
+    .sh-modal-actions,
+    .sh-confirm-buttons {
+        flex-wrap: wrap;
+    }
+
+        .sh-modal-actions > *,
+        .sh-confirm-buttons > * {
+            min-width: min(100%, 12rem);
+        }
+
+    .sh-cal-nav {
+        gap: 0.5rem;
+    }
+
+    .sh-cal-weekdays,
+    .sh-cal-days {
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .sh-results {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sh-cal-weekdays span {
+        font-size: 0.62rem;
+    }
+
+    .sh-cal-day {
+        height: 2.4rem;
+    }
+
+    .sh-modal-actions > *,
+    .sh-confirm-buttons > * {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* ESP32-CAM page */
+.sh-cam-page {
+    align-items: stretch;
+}
+
+.sh-cam-topbar {
+    display: flex;
+    align-items: center;
+}
+
+.sh-cam-panel {
+    width: 100%;
+}
+
+    .sh-cam-panel .sh-live-stage {
+        border-radius: var(--sh-radius);
+    }
+
+.sh-cam-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+}
+
+    .sh-cam-controls .sh-gallery-btn {
+        align-self: stretch;
+    }
+
+    .sh-cam-controls .sh-gallery-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.sh-cam-date {
+    max-width: 18rem;
+    margin-bottom: 1rem;
+}
+
+.sh-cam-history {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    max-height: 22rem;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.sh-cam-history-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1.5rem 0;
+    font-size: 0.85rem;
+    color: var(--sh-text-muted);
+    text-align: center;
+}
+
+    .sh-cam-history-note.is-error {
+        color: var(--sh-danger);
+    }
+
+.sh-cam-thumb {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--sh-cam-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+    .sh-cam-thumb:hover {
+        border-color: var(--sh-cam-mint-border);
+        transform: translateY(-2px);
+    }
+
+    .sh-cam-thumb:focus-visible {
+        outline: 2px solid var(--sh-accent);
+        outline-offset: 2px;
+    }
+
+    .sh-cam-thumb img {
+        display: block;
+        width: 100%;
+        height: 95px;
+        object-fit: cover;
+        background: #161d18;
+    }
+
+.sh-cam-thumb-time {
+    padding: 0.3rem 0.4rem;
+    border-top: 1px solid var(--sh-cam-border);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--sh-cam-ink);
+    text-align: center;
+}
+
+@media (max-width: 575.98px) {
+    .sh-cam-controls {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sh-cam-date {
+        max-width: none;
+    }
+
+    .sh-cam-history {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sh-cam-thumb {
+        transition: none;
+    }
+
+        .sh-cam-thumb:hover {
+            transform: none;
+        }
+}

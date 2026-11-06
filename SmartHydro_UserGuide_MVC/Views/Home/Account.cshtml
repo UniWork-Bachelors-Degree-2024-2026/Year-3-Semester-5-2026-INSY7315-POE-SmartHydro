@@ -1,0 +1,20 @@
+@model HelpPageViewModel
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/guide.css" asp-append-version="true" />
+}
+
+<div class="sh-guide-stack">
+    <partial name="_PageIntro" model="Model" />
+
+    @foreach (var task in Model.Tasks)
+    {
+        <partial name="_TaskCard" model="task" />
+    }
+</div>
+
+<partial name="_StepWalkthrough" />
+
+@section Scripts {
+    <script src="~/js/guide.js" asp-append-version="true"></script>
+}

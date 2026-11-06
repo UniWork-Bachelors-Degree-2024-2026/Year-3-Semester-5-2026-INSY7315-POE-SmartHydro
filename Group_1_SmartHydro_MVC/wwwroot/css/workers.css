@@ -1,0 +1,168 @@
+﻿.sh-inv-flash-error {
+    border-color: var(--sh-danger-border);
+    border-left-color: var(--sh-danger-outline);
+    background: var(--sh-danger-soft);
+    color: var(--sh-danger);
+}
+
+.sh-inv-form-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--sh-border);
+}
+
+.sh-inv-form-icon {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--sh-mint-strong);
+    color: var(--sh-ink);
+}
+
+    .sh-inv-form-icon .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+.sh-inv-form-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sh-text);
+}
+
+.sh-inv-form-text {
+    margin: 0.15rem 0 0;
+    font-size: 0.82rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-inv-input {
+    position: relative;
+}
+
+    .sh-inv-input .material-symbols-outlined {
+        position: absolute;
+        top: 50%;
+        left: 0.8rem;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: var(--sh-text-muted);
+        pointer-events: none;
+    }
+
+    .sh-inv-input .sh-input {
+        width: 100%;
+        padding-left: 2.5rem;
+    }
+
+.sh-inv-expiry {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--sh-text-muted);
+}
+
+    .sh-inv-expiry .material-symbols-outlined {
+        font-size: 17px;
+    }
+
+.sh-inv-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+    .sh-inv-submit .material-symbols-outlined {
+        font-size: 19px;
+    }
+
+    .sh-inv-submit:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+.sh-inv-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sh-inv-step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .sh-inv-step-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+        .sh-inv-step-list li div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            min-width: 0;
+        }
+
+    .sh-inv-step-list strong {
+        font-size: 0.9rem;
+        color: var(--sh-text);
+    }
+
+    .sh-inv-step-list li div span {
+        font-size: 0.82rem;
+        line-height: 1.45;
+        color: var(--sh-text-muted);
+    }
+
+.sh-inv-step-number {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sh-ink-fill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--sh-on-accent);
+}
+
+.sh-inv-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface-alt);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--sh-text-muted);
+}
+
+    .sh-inv-note .material-symbols-outlined {
+        flex: none;
+        font-size: 18px;
+        color: var(--sh-ink);
+    }
+
+.sh-inv-team {
+    margin-top: 1.25rem;
+}

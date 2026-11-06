@@ -1,0 +1,655 @@
+﻿@model AdminSitesViewModel
+@using Group_1_SmartHydro_MVC.Controllers
+
+@{
+    var culture = System.Globalization.CultureInfo.InvariantCulture;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+    string StatusTone(string status)
+    {
+        if (status == "Approved")
+        {
+            return "tone-good";
+        }
+
+        if (status == "PendingApproval")
+        {
+            return "tone-caution";
+        }
+
+        if (status == "Denied")
+        {
+            return "tone-alert";
+        }
+
+        return "tone-muted";
+    }
+
+    string StatusLabel(string status)
+    {
+        if (status == "PendingApproval")
+        {
+            return "Pending";
+        }
+
+        return status;
+    }
+
+    string Initial(string name)
+    {
+        var trimmed = (name ?? "").Trim();
+
+        if (trimmed.Length == 0)
+        {
+            return "?";
+        }
+
+        return trimmed.Substring(0, 1).ToUpperInvariant();
+    }
+
+    string Noun(int count, string word)
+    {
+        if (count == 1)
+        {
+            return word;
+        }
+
+        return word + "s";
+    }
+
+    string TeamStatusTone(string status)
+    {
+        if (status == "Joined")
+        {
+            return "sh-adm-status tone-good";
+        }
+
+        if (status == "Invited")
+        {
+            return "sh-adm-status tone-caution";
+        }
+
+        return "sh-adm-status tone-muted";
+    }
+
+    string TeamRowTone(string status)
+    {
+        if (status == "Joined")
+        {
+            return "sh-adm-row tone-good";
+        }
+
+        if (status == "Invited")
+        {
+            return "sh-adm-row tone-caution";
+        }
+
+        return "sh-adm-row tone-muted";
+    }
+
+    string TeamStatusIcon(string status)
+    {
+        if (status == "Joined")
+        {
+            return "check_circle";
+        }
+
+        if (status == "Invited")
+        {
+            return "schedule";
+        }
+
+        return "timer_off";
+    }
+
+    string TeamStatusLabel(string status)
+    {
+        if (status == "Invited")
+        {
+            return "Waiting";
+        }
+
+        return status;
+    }
+
+    string TeamWhen(TeamMember member)
+    {
+        var date = member.Since.ToLocalTime().ToString("d MMM yyyy", culture);
+
+        if (member.Status == "Joined")
+        {
+            return "Joined " + date;
+        }
+
+        return "Invited " + date;
+    }
+
+    string TeamInitial(TeamMember member)
+    {
+        var name = (member.FullName ?? member.Email).Trim();
+
+        if (name.Length == 0)
+        {
+            return "?";
+        }
+
+        return name.Substring(0, 1).ToUpperInvariant();
+    }
+
+    var siteOwners = Model.Groups
+        .SelectMany(g => g.Sites)
+        .ToDictionary(s => s.Id, s => s.OwnerEmail ?? "");
+    var joinedTotal = Model.Workers.Count(m => m.Status == "Joined");
+    var waitingTotal = Model.Workers.Count(m => m.Status == "Invited");
+
+    var structureTotal = Model.Groups.Sum(g => g.StructureCount);
+    var workerTotal = Model.Groups.Sum(g => g.WorkerCount);
+    var ownersWithSites = Model.Groups.Count(g => g.Sites.Count > 0);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/clear-modal.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/workers.js" asp-append-version="true"></script>
+    <script src="~/js/admin-sites.js" asp-append-version="true"></script>
+}
+
+<div class="sh-adm-page">
+    <div class="sh-status-header sh-adm-header">
+        <div>
+            <h2 class="sh-status-title">Sites by Operator</h2>
+            <span class="sh-status-subtitle">Every registered site, grouped under the operator who owns it.</span>
+        </div>
+
+        <div class="sh-adm-actions">
+            <a class="sh-back-btn-solid" asp-controller="Admin" asp-action="Index">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["AdminSitesMessage"] is string message)
+    {
+        <div class="sh-flash" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <span>@message</span>
+        </div>
+    }
+
+    @if (TempData["AdminSitesError"] is string error)
+    {
+        <div class="sh-flash sh-flash-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>@error</span>
+        </div>
+    }
+
+    @if (Model.LoadFailed)
+    {
+        <div class="sh-card sh-adm-card">
+            <div class="sh-adm-empty">
+                <span class="sh-adm-empty-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">cloud_off</span>
+                </span>
+                <h3 class="sh-adm-empty-title">Sites couldn't be loaded</h3>
+                <p class="sh-adm-empty-text">Your session may have expired. Refresh the page, or sign out and back in.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="sh-card sh-adm-summary" aria-label="Totals">
+            <div class="sh-adm-summary-item">
+                <span class="sh-adm-summary-icon" aria-hidden="true"><span class="material-symbols-outlined">holiday_village</span></span>
+                <span class="sh-adm-summary-text">
+                    <span><strong>@Model.SiteCount</strong> @Noun(Model.SiteCount, "site")</span>
+                    <span class="sh-adm-summary-note">Across @ownersWithSites @Noun(ownersWithSites, "owner")</span>
+                </span>
+            </div>
+            <div class="sh-adm-summary-item">
+                <span class="sh-adm-summary-icon" aria-hidden="true"><span class="material-symbols-outlined">grid_view</span></span>
+                <span class="sh-adm-summary-text">
+                    <span><strong>@structureTotal</strong> @Noun(structureTotal, "structure")</span>
+                    <span class="sh-adm-summary-note">Hydroponic and fodder</span>
+                </span>
+            </div>
+            <div class="sh-adm-summary-item">
+                <span class="sh-adm-summary-icon" aria-hidden="true"><span class="material-symbols-outlined">engineering</span></span>
+                <span class="sh-adm-summary-text">
+                    <span><strong>@workerTotal</strong> @Noun(workerTotal, "worker")</span>
+                    <span class="sh-adm-summary-note">Invited to these sites</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="sh-adm-groups">
+            @if (Model.Groups.Count == 0)
+            {
+                <div class="sh-card sh-adm-card">
+                    <div class="sh-adm-empty">
+                        <span class="sh-adm-empty-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined">add_location_alt</span>
+                        </span>
+                        <h3 class="sh-adm-empty-title">No sites or operators yet</h3>
+                        <p class="sh-adm-empty-text">Approve an operator from Pending Approvals and their starting site will appear here.</p>
+                    </div>
+                </div>
+            }
+
+            @foreach (var group in Model.Groups)
+            {
+                var otherOperators = Model.Operators
+                    .Where(o => !string.Equals(o.Email, group.OwnerEmail, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                var ownerStatusClass = "sh-adm-status " + StatusTone(group.OwnerStatus);
+
+                <section class="sh-card sh-adm-card" aria-label="Sites owned by @group.OwnerName">
+                    <div class="sh-adm-group-head">
+                        <div class="sh-adm-group-owner">
+                            <div class="sh-adm-person">
+                                <span class="sh-adm-avatar is-large" aria-hidden="true">@Initial(group.OwnerName)</span>
+                                <span class="sh-adm-person-text">
+                                    <span class="sh-adm-person-name">@group.OwnerName</span>
+                                    <span class="sh-adm-person-sub">@group.OwnerEmail · @group.OwnerRole</span>
+                                </span>
+                            </div>
+                            <span class="@ownerStatusClass">@StatusLabel(group.OwnerStatus)</span>
+                        </div>
+                        <div class="sh-adm-group-stats">
+                            <span class="sh-adm-chip">
+                                <span class="material-symbols-outlined" aria-hidden="true">holiday_village</span>
+                                <strong>@group.Sites.Count</strong> @Noun(group.Sites.Count, "site")
+                            </span>
+                            <span class="sh-adm-chip">
+                                <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+                                <strong>@group.StructureCount</strong> @Noun(group.StructureCount, "structure")
+                            </span>
+                            <span class="sh-adm-chip">
+                                <span class="material-symbols-outlined" aria-hidden="true">engineering</span>
+                                <strong>@group.WorkerCount</strong> @Noun(group.WorkerCount, "worker")
+                            </span>
+                        </div>
+                    </div>
+
+                    @if (group.Sites.Count == 0)
+                    {
+                        <p class="sh-adm-empty-inline">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_off</span>
+                            This operator doesn't have any sites yet.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="sh-adm-table-wrap">
+                            <table class="sh-adm-table">
+<caption class="visually-hidden">Sites by operator</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Site</th>
+                                        <th scope="col" class="is-number">Structures</th>
+                                        <th scope="col" class="is-number">Workers</th>
+                                        <th scope="col">Created</th>
+                                        <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var site in group.Sites)
+                                    {
+                                        <tr class="sh-adm-row tone-good">
+                                            <td class="is-lead">
+                                                <div class="sh-adm-site-name">
+                                                    <span class="sh-adm-site-icon" aria-hidden="true">
+                                                        <span class="material-symbols-outlined">agriculture</span>
+                                                    </span>
+                                                    <span class="sh-adm-person-text">
+                                                        <span class="sh-adm-person-name">@site.Name</span>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td data-label="Structures" class="is-number">@site.StructureCount</td>
+                                            <td data-label="Workers" class="is-number">@site.WorkerCount</td>
+                                            <td data-label="Created" class="is-date">@site.CreatedAt.ToLocalTime().ToString("d MMM yyyy", culture)</td>
+                                            <td data-label="Actions" class="sh-adm-col-action">
+                                                <div class="sh-adm-row-actions">
+                                                    @if (otherOperators.Count > 0)
+                                                    {
+                                                        <form class="sh-adm-move" method="post" asp-action="AssignOwner">
+                                                            <input type="hidden" name="siteId" value="@site.Id" />
+                                                            <input type="hidden" name="siteName" value="@site.Name" />
+                                                            <label class="visually-hidden" for="sh-move-@site.Id">Move @site.Name to</label>
+                                                            <div class="sh-select-wrap">
+                                                                <select class="sh-input sh-select" id="sh-move-@site.Id" name="ownerEmail" required>
+                                                                    <option value="">Move to...</option>
+                                                                    @foreach (var op in otherOperators)
+                                                                    {
+                                                                        <option value="@op.Email">@op.Email</option>
+                                                                    }
+                                                                </select>
+                                                                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                                                            </div>
+                                                            <button type="submit" class="sh-adm-btn">
+                                                                <span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>
+                                                                Move
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    <form method="post" asp-controller="Site" asp-action="Select">
+                                                        <input type="hidden" name="id" value="@site.Id" />
+                                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                                        <button type="submit" class="sh-adm-btn" title="Open @site.Name" aria-label="Open @site.Name">
+                                                            <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                                            Open
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="sh-adm-btn is-danger" title="Delete @site.Name" aria-label="Delete @site.Name"
+                                                            data-delete-site-id="@site.Id" data-delete-site-name="@site.Name"
+                                                            data-delete-site-structures="@site.StructureCount">
+                                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                    @if (group.CanReceiveSites)
+                    {
+                        <details class="sh-adm-give">
+                            <summary>
+                                <span class="material-symbols-outlined" aria-hidden="true">add_location_alt</span>
+                                Give @group.OwnerName a new site
+                                <span class="material-symbols-outlined sh-adm-give-chevron" aria-hidden="true">expand_more</span>
+                            </summary>
+                            <form method="post" asp-action="GiveSite">
+                                <input type="hidden" name="ownerEmail" value="@group.OwnerEmail" />
+                                <div class="sh-adm-give-fields">
+                                    <input class="sh-input" type="text" name="name" required maxlength="@SiteController.MaxNameLength" placeholder="Site name" aria-label="Site name" autocomplete="off" />
+                                    <button type="submit" class="sh-primary-btn">
+                                        <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                                        Create site
+                                    </button>
+                                </div>
+                            </form>
+                        </details>
+                    }
+                </section>
+            }
+        </div>
+
+        <section class="sh-card sh-adm-card" id="sh-adm-workers" aria-labelledby="sh-adm-workers-title">
+            <div class="sh-adm-card-head">
+                <div class="sh-adm-card-heading">
+                    <h3 class="sh-adm-card-title" id="sh-adm-workers-title">Workers</h3>
+                    <span class="sh-adm-showing">@joinedTotal joined, @waitingTotal waiting to join</span>
+                </div>
+            </div>
+
+            @if (Model.WorkersLoadFailed)
+            {
+                <p class="sh-adm-empty-inline">
+                    <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+                    Workers couldn't be loaded right now. Refresh the page to try again.
+                </p>
+            }
+            else if (Model.Workers.Count == 0)
+            {
+                <div class="sh-adm-empty">
+                    <span class="sh-adm-empty-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">group_add</span>
+                    </span>
+                    <h3 class="sh-adm-empty-title">No workers yet</h3>
+                    <p class="sh-adm-empty-text">Workers invited by operators appear here, and move to Joined once they accept.</p>
+                </div>
+            }
+            else
+            {
+                <div class="sh-adm-table-wrap">
+                    <table class="sh-adm-table">
+<caption class="visually-hidden">Workers</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Worker</th>
+                                <th scope="col">Site</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var member in Model.Workers)
+                            {
+                                siteOwners.TryGetValue(member.SiteId, out var siteOwner);
+
+                                <tr class="@TeamRowTone(member.Status)">
+                                    <td class="is-lead">
+                                        <div class="sh-adm-person">
+                                            <span class="sh-adm-avatar" aria-hidden="true">@TeamInitial(member)</span>
+                                            <span class="sh-adm-person-text">
+                                                @if (string.IsNullOrWhiteSpace(member.FullName))
+                                                {
+                                                    <a class="sh-adm-person-name sh-adm-mail" href="mailto:@member.Email" title="Email @member.Email">@member.Email</a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="sh-adm-person-name">@member.FullName</span>
+                                                    <a class="sh-adm-person-sub sh-adm-mail" href="mailto:@member.Email" title="Email @member.Email">@member.Email</a>
+                                                }
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td data-label="Site">
+                                        <span class="sh-adm-person-text">
+                                            <span>@member.SiteName</span>
+                                            @if (!string.IsNullOrWhiteSpace(siteOwner))
+                                            {
+                                                <span class="sh-adm-person-sub">@siteOwner</span>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td data-label="Status">
+                                        <span class="@TeamStatusTone(member.Status)">
+                                            <span class="material-symbols-outlined" aria-hidden="true">@TeamStatusIcon(member.Status)</span>
+                                            @TeamStatusLabel(member.Status)
+                                        </span>
+                                    </td>
+                                    <td data-label="Date" class="is-date">@TeamWhen(member)</td>
+                                    <td data-label="Actions" class="sh-adm-col-action">
+                                        @if (member.Status == "Joined" && member.UserId.HasValue)
+                                        {
+                                            <button type="button" class="sh-adm-btn is-danger" title="Remove @member.Email from @member.SiteName" aria-label="Remove @member.Email from @member.SiteName"
+                                                    data-team-action="@Url.Action("RemoveWorker", "Admin", new { siteId = member.SiteId, userId = member.UserId })"
+                                                    data-team-kind="remove" data-team-email="@member.Email" data-team-site="@member.SiteName">
+                                                <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
+                                                Remove
+                                            </button>
+                                        }
+                                        @if (member.Status == "Invited")
+                                        {
+                                            <button type="button" class="sh-adm-btn is-danger" title="Cancel the invitation to @member.Email" aria-label="Cancel the invitation to @member.Email"
+                                                    data-team-action="@Url.Action("CancelInvite", "Admin", new { siteId = member.SiteId })"
+                                                    data-team-kind="cancel" data-team-email="@member.Email" data-team-site="@member.SiteName">
+                                                <span class="material-symbols-outlined" aria-hidden="true">cancel_schedule_send</span>
+                                                Cancel invite
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+
+        @if (Model.DeletedSitesLoadFailed)
+        {
+            <section class="sh-card sh-adm-card" aria-label="Deleted sites">
+                <p class="sh-adm-empty-inline">
+                    <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+                    Deleted sites couldn't be loaded right now. Refresh the page to try again.
+                </p>
+            </section>
+        }
+        else if (Model.DeletedSites.Count > 0)
+        {
+            <section class="sh-card sh-adm-card" id="sh-adm-deleted-sites" aria-labelledby="sh-adm-deleted-title">
+                <div class="sh-adm-card-head">
+                    <div class="sh-adm-card-heading">
+                        <h3 class="sh-adm-card-title" id="sh-adm-deleted-title">Deleted sites</h3>
+                        <span class="sh-adm-showing">Restoring a site also brings back the structures that were deleted with it.</span>
+                    </div>
+                </div>
+
+                <div class="sh-adm-table-wrap">
+                    <table class="sh-adm-table">
+<caption class="visually-hidden">Deleted sites</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Site</th>
+                                <th scope="col">Owner</th>
+                                <th scope="col" class="is-number">Structures</th>
+                                <th scope="col">Deleted</th>
+                                <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var deleted in Model.DeletedSites)
+                            {
+                                <tr class="sh-adm-row tone-muted">
+                                    <td class="is-lead">
+                                        <div class="sh-adm-site-name">
+                                            <span class="sh-adm-site-icon" aria-hidden="true">
+                                                <span class="material-symbols-outlined">agriculture</span>
+                                            </span>
+                                            <span class="sh-adm-person-text">
+                                                <span class="sh-adm-person-name">@deleted.Name</span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td data-label="Owner">@deleted.OwnerEmail</td>
+                                    <td data-label="Structures" class="is-number">@deleted.StructureCount</td>
+                                    <td data-label="Deleted" class="is-date">
+                                        <span class="sh-adm-person-text">
+                                            @if (deleted.DeletedAt.HasValue)
+                                            {
+                                                <span>@deleted.DeletedAt.Value.ToLocalTime().ToString("d MMM yyyy", culture)</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Earlier</span>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(deleted.DeletedByEmail))
+                                            {
+                                                <span class="sh-adm-person-sub">by @deleted.DeletedByEmail</span>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td data-label="Actions" class="sh-adm-col-action">
+                                        <div class="sh-adm-row-actions">
+                                            <form method="post" asp-action="RestoreSite">
+                                                <input type="hidden" name="siteId" value="@deleted.Id" />
+                                                <input type="hidden" name="siteName" value="@deleted.Name" />
+                                                <button type="submit" class="sh-adm-btn" title="Restore @deleted.Name" aria-label="Restore @deleted.Name">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">restore_from_trash</span>
+                                                    Restore
+                                                </button>
+                                            </form>
+                                            <button type="button" class="sh-adm-btn is-danger" title="Permanently delete @deleted.Name" aria-label="Permanently delete @deleted.Name"
+                                                    data-purge-site-id="@deleted.Id" data-purge-site-name="@deleted.Name"
+                                                    data-purge-site-structures="@deleted.StructureCount">
+                                                <span class="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                                                Purge
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+    }
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-team-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-team-modal-title" aria-describedby="sh-team-modal-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-team-modal-form" method="post" asp-antiforgery="true" action="#">
+                <input type="hidden" name="email" id="sh-team-modal-email" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" id="sh-team-modal-icon">person_remove</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-team-modal-title">Remove from site?</h2>
+                    <p class="sh-clear-text" id="sh-team-modal-text"></p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Keep</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-team-modal-confirm">Yes, remove</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-delete-site-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-delete-site-title" aria-describedby="sh-delete-site-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-delete-site-form" method="post" asp-action="DeleteSite">
+                <input type="hidden" name="siteId" id="sh-delete-site-id" value="" />
+                <input type="hidden" name="siteName" id="sh-delete-site-name-field" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">delete</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-delete-site-title">Delete this site?</h2>
+                    <p class="sh-clear-text" id="sh-delete-site-text">
+                        <strong id="sh-delete-site-name"></strong> will be moved to deleted items, and its open worker invitations will be cancelled.
+                        <span id="sh-delete-site-structures"></span>
+                    </p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-delete-site-submit">Yes, delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-purge-site-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-purge-site-title" aria-describedby="sh-purge-site-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-purge-site-form" method="post" asp-action="PurgeSite">
+                <input type="hidden" name="siteId" id="sh-purge-site-id" value="" />
+                <input type="hidden" name="siteName" id="sh-purge-site-name-field" value="" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-purge-site-title">Permanently delete?</h2>
+                    <p class="sh-clear-text" id="sh-purge-site-text">
+                        <strong id="sh-purge-site-name"></strong> will be permanently removed. This cannot be restored afterwards.
+                        <span id="sh-purge-site-structures"></span>
+                    </p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm" id="sh-purge-site-submit">Yes, permanently delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

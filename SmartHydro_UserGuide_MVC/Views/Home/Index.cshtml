@@ -1,0 +1,125 @@
+@model HelpPageViewModel
+@{
+    var tasks = new[]
+    {
+        new { Action = "Owners", Fragment = "readings", Icon = "monitoring", Title = "Check my plants", Text = "See if anything needs attention", Css = "sh-tile" },
+        new { Action = "Owners", Fragment = "pair", Icon = "wifi_tethering", Title = "Connect to my box", Text = "Offline mode, standing at the box", Css = "sh-tile" },
+        new { Action = "Account", Fragment = "signin", Icon = "login", Title = "Sign in", Text = "Password and email code", Css = "sh-tile" },
+        new { Action = "Owners", Fragment = "dose", Icon = "science", Title = "Fix pH or plant food", Text = "Add a small amount", Css = "sh-tile" },
+        new { Action = "Owners", Fragment = "invite", Icon = "person_add", Title = "Add a worker", Text = "Invite someone by email", Css = "sh-tile" },
+        new { Action = "Troubleshoot", Fragment = "", Icon = "build", Title = "Something is wrong", Text = "We will help you fix it", Css = "sh-tile sh-tile-warn" }
+    };
+
+    var people = new[]
+    {
+        new { Action = "Owners", Icon = "agriculture", Title = "I own a farm", Text = "Like Jane Doe, who grows spinach and fodder" },
+        new { Action = "Workers", Icon = "badge", Title = "I work on a farm", Text = "Like John Doe, who checks the plants every morning" }
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<div class="sh-guide-stack">
+
+    <section class="sh-card sh-hello">
+        <h2 class="sh-hello-title">Welcome to the Smart Hydro help guide</h2>
+        <p class="sh-hello-text">Smart Hydro looks after your plants. It checks the water, plant food, temperature and light, and lets you switch things on and off from your phone, even without internet.</p>
+        <div class="sh-helpers">
+            <span>
+                <span class="material-symbols-outlined" aria-hidden="true">contrast</span>
+                <span>Use high contrast or dark mode if the screen is hard to read</span>
+            </span>
+            <span>
+                <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+                <span>Use <b>Show me one step at a time</b> for help as you go</span>
+            </span>
+        </div>
+    </section>
+
+    <section class="sh-card">
+        <div class="sh-card-head">
+            <span class="sh-card-head-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">swap_horiz</span>
+            </span>
+            <div>
+                <h3 class="sh-card-head-title">Two ways to use Smart Hydro</h3>
+                <p class="sh-card-head-text">Choose the one that suits you. You can use both.</p>
+            </div>
+        </div>
+        <div class="sh-modes">
+            <div class="sh-mode">
+                <h4><span class="material-symbols-outlined" aria-hidden="true">cloud</span>Online</h4>
+                <p><b>You need:</b> an account, and internet on your phone or computer.</p>
+                <p><b>You can:</b> check your farm from anywhere, get warnings, change healthy ranges, invite workers and see camera photos.</p>
+                <p><b>Start:</b> sign in on the website or in the phone app.</p>
+                <a asp-controller="Home" asp-action="Account" asp-fragment="signin">How to sign in</a>
+            </div>
+            <div class="sh-mode">
+                <h4><span class="material-symbols-outlined" aria-hidden="true">wifi_off</span>Offline mode</h4>
+                <p><b>You need:</b> the phone app, and to stand near your box. No account, internet or airtime.</p>
+                <p><b>You can:</b> see the numbers, switch things on or off, add pH liquid or plant food, and change how the box connects, straight from the box over Bluetooth.</p>
+                <p><b>Start:</b> open the app and tap <b>Continue Offline</b>.</p>
+                <a asp-controller="Home" asp-action="Account" asp-fragment="offline">How offline mode works</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="sh-card">
+        <div class="sh-card-head">
+            <span class="sh-card-head-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">settings_input_antenna</span>
+            </span>
+            <div>
+                <h3 class="sh-card-head-title">How your box sends information</h3>
+                <p class="sh-card-head-text">Your Smart Hydro box can send its information in four ways:</p>
+            </div>
+        </div>
+        <ul class="sh-ways">
+            <li><b>LoRa long-range radio</b>, the normal way. The box sends its readings by radio to the farm's gateway, which passes them on to Smart Hydro over mobile data (4G). No farm Wi-Fi is needed.</li>
+            <li><b>Through Wi-Fi with internet</b>, when the box is near farm or home Wi-Fi, or a phone hotspot. Changes you make on the website reach the box straight away.</li>
+            <li><b>Bluetooth</b>, when a phone is close to the box. This is how the phone app talks to the box when there is no internet. You pair your phone once, using a code on the box's screen.</li>
+            <li><b>Through the box's own Wi-Fi</b>, the backup for offline mode. You stand at the box with no internet, and your phone joins the box's Wi-Fi to talk to it directly.</li>
+        </ul>
+        <p class="sh-read-more">
+            <a asp-controller="Home" asp-action="Owners" asp-fragment="modes">Read more about how the box connects</a>
+        </p>
+    </section>
+
+    <h2 class="sh-sectitle">What do you want to do?</h2>
+    <div class="sh-tiles">
+        @foreach (var task in tasks)
+        {
+            <a class="@task.Css" asp-controller="Home" asp-action="@task.Action" asp-fragment="@task.Fragment">
+                <span class="material-symbols-outlined" aria-hidden="true">@task.Icon</span>
+                <b>@task.Title</b>
+                <small>@task.Text</small>
+            </a>
+        }
+    </div>
+
+    <h2 class="sh-sectitle">Who are you?</h2>
+    <div class="sh-people">
+        @foreach (var person in people)
+        {
+            <a class="sh-person" asp-controller="Home" asp-action="@person.Action">
+                <span class="sh-person-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">@person.Icon</span>
+                </span>
+                <span>
+                    <b>@person.Title</b>
+                    <small>@person.Text</small>
+                </span>
+            </a>
+        }
+    </div>
+
+    <h2 class="sh-sectitle">New to Smart Hydro?</h2>
+    <a class="sh-tile" asp-controller="Home" asp-action="Setup">
+        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+        <b>Start with Getting set up</b>
+        <small>Put the app on your phone and turn on your box. About 10 minutes.</small>
+    </a>
+
+</div>

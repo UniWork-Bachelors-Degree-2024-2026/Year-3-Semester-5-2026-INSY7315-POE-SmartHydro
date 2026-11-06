@@ -1,0 +1,584 @@
+﻿@model AdminDashboardViewModel
+
+@{
+    var culture = System.Globalization.CultureInfo.InvariantCulture;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+    string StatusLabel(string status)
+    {
+        if (status == "PendingApproval")
+        {
+            return "Pending";
+        }
+
+        return status;
+    }
+
+    string StatusTone(string status)
+    {
+        if (status == "Approved")
+        {
+            return "tone-good";
+        }
+
+        if (status == "PendingApproval")
+        {
+            return "tone-caution";
+        }
+
+        if (status == "Denied")
+        {
+            return "tone-alert";
+        }
+
+        return "tone-muted";
+    }
+
+    string StatusIcon(string status)
+    {
+        if (status == "Approved")
+        {
+            return "check_circle";
+        }
+
+        if (status == "PendingApproval")
+        {
+            return "schedule";
+        }
+
+        if (status == "Denied")
+        {
+            return "cancel";
+        }
+
+        return "block";
+    }
+
+    string RoleIcon(string role)
+    {
+        if (role == "Admin")
+        {
+            return "shield_person";
+        }
+
+        if (role == "Operator")
+        {
+            return "agriculture";
+        }
+
+        return "engineering";
+    }
+
+    string DisplayName(AdminUser user)
+    {
+        if (!string.IsNullOrWhiteSpace(user.FullName))
+        {
+            return user.FullName;
+        }
+
+        return user.Email;
+    }
+
+    string Initial(AdminUser user)
+    {
+        var name = DisplayName(user).Trim();
+
+        if (name.Length == 0)
+        {
+            return "?";
+        }
+
+        return name.Substring(0, 1).ToUpperInvariant();
+    }
+
+    string EmailLocalPart(string email)
+    {
+        var at = email.LastIndexOf('@');
+
+        if (at <= 0)
+        {
+            return email;
+        }
+
+        return email.Substring(0, at);
+    }
+
+    string EmailDomain(string email)
+    {
+        var at = email.LastIndexOf('@');
+
+        if (at <= 0)
+        {
+            return "";
+        }
+
+        return email.Substring(at);
+    }
+
+    string LastSignIn(AdminUser user)
+    {
+        if (!user.LastLoginAt.HasValue)
+        {
+            return "Never";
+        }
+
+        return user.LastLoginAt.Value.ToLocalTime().ToString("d MMM yyyy, HH:mm", culture);
+    }
+
+    string SearchText(AdminUser user)
+    {
+        var parts = new List<string> { user.Email, user.FullName ?? "", user.FarmName ?? "" };
+        parts.AddRange(user.AssignedSites);
+        return string.Join(" ", parts).ToLowerInvariant();
+    }
+
+    string StatusOptionList(AdminUser user)
+    {
+        return string.Join(",", user.StatusOptions.Select(o => o.Action));
+    }
+
+    var usersCaption = Model.ActiveThisWeek + " signed in this week";
+    if (Model.DisabledCount > 0)
+    {
+        usersCaption = usersCaption + ", " + Model.DisabledCount + " disabled";
+    }
+
+    var pendingTone = "sh-adm-stat tone-muted";
+    var pendingCaption = "Nobody is waiting";
+    if (Model.PendingCount > 0)
+    {
+        pendingTone = "sh-adm-stat tone-caution";
+        pendingCaption = "Awaiting your review";
+    }
+
+    var operatorsCaption = "Approved, none waiting or denied";
+    if (Model.OperatorsNotApproved > 0)
+    {
+        operatorsCaption = "Approved, plus " + Model.OperatorsNotApproved + " not approved";
+    }
+
+    var usersWord = "users";
+    if (Model.Users.Count == 1)
+    {
+        usersWord = "user";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/clear-modal.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/admin-users.js" asp-append-version="true"></script>
+}
+
+<div class="sh-adm-page">
+    <div class="sh-status-header sh-adm-header">
+        <div>
+            <h2 class="sh-status-title">Admin Dashboard</h2>
+            <span class="sh-status-subtitle">Who is using Smart Hydro, and where.</span>
+        </div>
+
+        <div class="sh-adm-actions">
+            <a class="sh-primary-btn" asp-action="Sites">
+                <span class="material-symbols-outlined" aria-hidden="true">holiday_village</span>
+                Sites by Operator
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["AdminUsersMessage"] is string usersMessage && !string.IsNullOrWhiteSpace(usersMessage))
+    {
+        <div class="sh-flash" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <span>@usersMessage</span>
+        </div>
+    }
+
+    @if (TempData["AdminUsersError"] is string usersError && !string.IsNullOrWhiteSpace(usersError))
+    {
+        <div class="sh-flash sh-flash-error" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            <span>@usersError</span>
+        </div>
+    }
+
+    @if (Model.LoadFailed)
+    {
+        <div class="sh-card sh-adm-card">
+            <div class="sh-adm-empty">
+                <span class="sh-adm-empty-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+                </span>
+                <h3 class="sh-adm-empty-title">The dashboard couldn't be loaded</h3>
+                <p class="sh-adm-empty-text">Your session may have expired. Refresh the page, or sign out and back in.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="sh-adm-stats">
+            <a class="sh-adm-stat" asp-action="Index">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">group</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.TotalUsers</span>
+                    <span class="sh-adm-stat-label">Users</span>
+                </span>
+                <span class="sh-adm-stat-caption">@usersCaption</span>
+            </a>
+            <a class="sh-adm-stat tone-good" asp-action="Index" asp-route-role="Operator">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">agriculture</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.OperatorCount</span>
+                    <span class="sh-adm-stat-label">Operators</span>
+                </span>
+                <span class="sh-adm-stat-caption">@operatorsCaption</span>
+            </a>
+            <a class="sh-adm-stat" asp-action="Index" asp-route-role="Worker">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">engineering</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.WorkerCount</span>
+                    <span class="sh-adm-stat-label">Workers</span>
+                </span>
+                <span class="sh-adm-stat-caption">Invited by operators</span>
+            </a>
+            <a class="@pendingTone" asp-action="PendingApprovals">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">how_to_reg</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.PendingCount</span>
+                    <span class="sh-adm-stat-label">Pending</span>
+                </span>
+                <span class="sh-adm-stat-caption">@pendingCaption</span>
+            </a>
+            <a class="sh-adm-stat tone-good" asp-action="Sites">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">holiday_village</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.SiteCount</span>
+                    <span class="sh-adm-stat-label">Sites</span>
+                </span>
+                <span class="sh-adm-stat-caption">@Model.StructureCount structures in total</span>
+            </a>
+            <a class="sh-adm-stat tone-muted" asp-action="Index" asp-route-role="Admin">
+                <span class="sh-adm-stat-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">shield_person</span></span>
+                <span class="sh-adm-stat-body">
+                    <span class="sh-adm-stat-count">@Model.AdminCount</span>
+                    <span class="sh-adm-stat-label">Admins</span>
+                </span>
+                <span class="sh-adm-stat-caption">Signed in at least once</span>
+            </a>
+        </div>
+
+        <div class="sh-adm-columns">
+            <div class="sh-adm-main">
+                <section class="sh-card sh-adm-card" aria-labelledby="sh-adm-users-title">
+                    <div class="sh-adm-card-head">
+                        <div class="sh-adm-card-heading">
+                            <h3 class="sh-adm-card-title" id="sh-adm-users-title">Users</h3>
+                            <span class="sh-adm-showing" id="sh-adm-showing" aria-live="polite">Showing @Model.Users.Count @usersWord</span>
+                        </div>
+
+                        <form class="sh-adm-search" method="get" asp-action="Index" role="search" id="sh-adm-filter">
+                            <label class="visually-hidden" for="sh-adm-role">Role</label>
+                            <div class="sh-select-wrap">
+                                <select class="sh-input sh-select" id="sh-adm-role" name="role">
+                                    @foreach (var option in AdminUserFilters.Roles)
+                                    {
+                                        <option value="@option.Value" selected="@string.Equals(Model.Role, option.Value, StringComparison.OrdinalIgnoreCase)">@option.Label</option>
+                                    }
+                                </select>
+                                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                            </div>
+                            <label class="visually-hidden" for="sh-adm-status">Status</label>
+                            <div class="sh-select-wrap">
+                                <select class="sh-input sh-select" id="sh-adm-status" name="status">
+                                    @foreach (var option in AdminUserFilters.Statuses)
+                                    {
+                                        <option value="@option.Value" selected="@string.Equals(Model.Status, option.Value, StringComparison.OrdinalIgnoreCase)">@option.Label</option>
+                                    }
+                                </select>
+                                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                            </div>
+                            <label class="visually-hidden" for="sh-adm-q">Search users</label>
+                            <div class="sh-adm-search-box">
+                                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                                <input class="sh-input" id="sh-adm-q" type="search" name="q" value="@Model.Search" placeholder="Search name, email or site" maxlength="100" autocomplete="off" />
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="sh-adm-empty" id="sh-adm-no-match" hidden>
+                        <span class="sh-adm-empty-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>
+                        </span>
+                        <h3 class="sh-adm-empty-title">No users match</h3>
+                        <p class="sh-adm-empty-text">Try another role or status, or clear the search.</p>
+                    </div>
+
+                    @if (Model.Users.Count == 0)
+                    {
+                        <div class="sh-adm-empty">
+                            <span class="sh-adm-empty-icon" aria-hidden="true">
+                                <span class="material-symbols-outlined" aria-hidden="true">person_off</span>
+                            </span>
+                            <h3 class="sh-adm-empty-title">No users yet</h3>
+                            <p class="sh-adm-empty-text">People appear here once they sign up or are invited.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sh-adm-table-wrap">
+                            <table class="sh-adm-table" id="sh-adm-users-table">
+                                <caption class="visually-hidden">Users</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">User</th>
+                                        <th scope="col">Role</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Sites</th>
+                                        <th scope="col">Joined</th>
+                                        <th scope="col">Last sign-in</th>
+                                        <th scope="col" class="sh-adm-col-action"><span class="visually-hidden">Actions</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        var rowClass = "sh-adm-row " + StatusTone(user.Status);
+                                        var statusClass = "sh-adm-status " + StatusTone(user.Status);
+
+                                        <tr class="@rowClass" data-role="@user.Role" data-status="@user.Status" data-search="@SearchText(user)">
+                                            <td class="is-lead">
+                                                <div class="sh-adm-person">
+                                                    <span class="sh-adm-avatar" aria-hidden="true">@Initial(user)</span>
+                                                    <span class="sh-adm-person-text">
+                                                        @if (string.IsNullOrWhiteSpace(user.FullName))
+                                                        {
+                                                            <a class="sh-adm-person-name sh-adm-mail" href="mailto:@user.Email" title="Email @user.Email">@user.Email</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="sh-adm-person-name">@user.FullName</span>
+                                                            <a class="sh-adm-person-sub sh-adm-mail" href="mailto:@user.Email" title="Email @user.Email">@user.Email</a>
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td data-label="Role">
+                                                <span class="sh-adm-role">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">@RoleIcon(user.Role)</span>
+                                                    @user.Role
+                                                </span>
+                                            </td>
+                                            <td data-label="Status">
+                                                <span class="@statusClass">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">@StatusIcon(user.Status)</span>
+                                                    @StatusLabel(user.Status)
+                                                </span>
+                                            </td>
+                                            <td data-label="Sites">
+                                                @if (user.Role == "Worker")
+                                                {
+                                                    if (user.AssignedSites.Count == 0)
+                                                    {
+                                                        <span class="sh-adm-muted">Not assigned</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@string.Join(", ", user.AssignedSites)</span>
+                                                    }
+                                                }
+                                                else if (user.Role == "Operator" && user.Status == "PendingApproval")
+                                                {
+                                                    <span class="sh-adm-muted">Starting site: @user.FarmName</span>
+                                                }
+                                                else if (user.OwnedSiteCount > 0)
+                                                {
+                                                    <span>@user.OwnedSiteCount owned</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="sh-adm-muted">None</span>
+                                                }
+                                            </td>
+                                            <td data-label="Joined" class="is-date">@user.CreatedAt.ToLocalTime().ToString("d MMM yyyy", culture)</td>
+                                            <td data-label="Last sign-in" class="is-date">@LastSignIn(user)</td>
+                                            <td data-label="Actions" class="sh-adm-col-action">
+                                                <div class="sh-adm-row-actions">
+                                                    <button type="button" class="sh-adm-btn" title="Edit @user.Email" aria-label="Edit @user.Email"
+                                                            data-edit-user-id="@user.Id"
+                                                            data-edit-user-email="@user.Email"
+                                                            data-edit-user-name="@user.FullName"
+                                                            data-edit-user-farm="@user.FarmName"
+                                                            data-edit-user-role="@user.Role"
+                                                            data-edit-user-status="@user.Status"
+                                                            data-edit-user-protected="@user.IsProtected.ToString().ToLowerInvariant()"
+                                                            data-edit-user-self="@user.IsCurrentUser.ToString().ToLowerInvariant()"
+                                                            data-edit-user-options="@StatusOptionList(user)">
+                                                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                                        Edit
+                                                    </button>
+                                                    @if (user.AllowedActions.Contains("delete"))
+                                                    {
+                                                        <button type="button" class="sh-adm-btn is-danger" title="Delete @user.Email" aria-label="Delete @user.Email"
+                                                                data-delete-user-id="@user.Id" data-delete-user-email="@user.Email"
+                                                                data-delete-user-sites="@user.OwnedSiteCount">
+                                                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                                            Delete
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </section>
+            </div>
+
+            <section class="sh-card sh-adm-card" aria-labelledby="sh-adm-recent-title">
+                <div class="sh-adm-card-head">
+                    <h3 class="sh-adm-card-title" id="sh-adm-recent-title">Newest sign-ups</h3>
+                </div>
+                @if (Model.RecentSignUps.Count == 0)
+                {
+                    <p class="sh-adm-empty-inline">
+                        <span class="material-symbols-outlined" aria-hidden="true">person_off</span>
+                        Nobody has signed up yet.
+                    </p>
+                }
+                else
+                {
+                    <ul class="sh-adm-recent">
+                        @foreach (var user in Model.RecentSignUps)
+                        {
+                            var statusClass = "sh-adm-status " + StatusTone(user.Status);
+
+                            <li>
+                                <span class="sh-adm-avatar" aria-hidden="true">@Initial(user)</span>
+                                @if (string.IsNullOrWhiteSpace(user.FullName))
+                                {
+                                    <a class="sh-adm-person-name sh-adm-mail sh-adm-recent-email" href="mailto:@user.Email" title="@user.Email">
+                                        <span class="sh-adm-recent-email-local">@EmailLocalPart(user.Email)</span>
+                                        <span class="sh-adm-recent-email-domain">@EmailDomain(user.Email)</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="sh-adm-person-name sh-adm-mail" href="mailto:@user.Email" title="@user.FullName (@user.Email)">@user.FullName</a>
+                                }
+                                <span class="sh-adm-recent-meta">
+                                    <span class="sh-adm-recent-role">
+                                        <span class="material-symbols-outlined" aria-hidden="true">@RoleIcon(user.Role)</span>
+                                        <strong>@user.Role</strong>
+                                        <span aria-hidden="true">·</span>
+                                        @user.CreatedAt.ToLocalTime().ToString("d MMM yyyy", culture)
+                                    </span>
+                                    <span class="@statusClass">@StatusLabel(user.Status)</span>
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+    }
+</div>
+
+<div class="modal fade sh-site-modal" id="sh-edit-user-modal" tabindex="-1" aria-labelledby="sh-edit-user-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="sh-edit-user-form" method="post" asp-action="EditUser" data-action-base="@Url.Action("EditUser", "Admin")">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <input type="hidden" id="sh-edit-role-locked" value="" />
+                <input type="hidden" id="sh-edit-email" name="email" value="" />
+                <div class="sh-site-modal-head">
+                    <span class="sh-site-modal-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                    </span>
+                    <div class="sh-site-modal-heading">
+                        <h2 class="sh-site-modal-title" id="sh-edit-user-title">Edit account</h2>
+                        <p class="sh-site-modal-text" id="sh-edit-user-text"></p>
+                    </div>
+                    <button type="button" class="sh-site-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                    </button>
+                </div>
+
+                <div class="modal-body sh-site-modal-body sh-adm-edit-body">
+                    <div class="sh-field">
+                        <label class="sh-field-label" for="sh-edit-name">Full name <span class="sh-site-optional">(optional)</span></label>
+                        <input class="sh-input" type="text" id="sh-edit-name" name="fullName" maxlength="100" autocomplete="off" />
+                    </div>
+
+                    <div class="sh-field" id="sh-edit-farm-field">
+                        <label class="sh-field-label" for="sh-edit-farm">Starting site name</label>
+                        <input class="sh-input" type="text" id="sh-edit-farm" name="farmName" maxlength="60" autocomplete="off" />
+                        <span class="sh-field-hint">This becomes their first site when they are approved.</span>
+                    </div>
+
+                    <div class="sh-adm-edit-row" id="sh-edit-row">
+                        <div class="sh-field" id="sh-edit-role-field">
+                            <label class="sh-field-label" for="sh-edit-role">Role</label>
+                            <div class="sh-select-wrap">
+                                <select class="sh-input sh-select" id="sh-edit-role" name="role">
+                                    <option value="Admin" id="sh-edit-role-admin">Admin</option>
+                                    <option value="Operator">Operator</option>
+                                    <option value="Worker">Worker</option>
+                                </select>
+                                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                            </div>
+                        </div>
+
+                        <div class="sh-field" id="sh-edit-status-field">
+                            <label class="sh-field-label" for="sh-edit-status">Status</label>
+                            <div class="sh-select-wrap">
+                                <select class="sh-input sh-select" id="sh-edit-status" name="statusAction"></select>
+                                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="sh-adm-edit-note" id="sh-edit-role-hint" hidden>Admins can see and manage every account, site and structure. They'll need to sign in again to get admin access.</p>
+                    <p class="sh-adm-edit-note" id="sh-edit-note" hidden></p>
+                </div>
+
+                <div class="sh-site-modal-foot sh-site-create-foot">
+                    <button type="button" class="sh-site-secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="sh-primary-btn">
+                        <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-delete-user-modal" tabindex="-1" role="alertdialog"
+     aria-labelledby="sh-delete-user-title" aria-describedby="sh-delete-user-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-delete-user-form" method="post" asp-action="DeleteUser" data-action-base="@Url.Action("DeleteUser", "Admin")">
+                <input type="hidden" name="email" id="sh-delete-user-email" value="" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <div class="modal-body">
+                    <span class="sh-clear-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
+                    </span>
+                    <h2 class="sh-clear-title" id="sh-delete-user-title">Delete this account?</h2>
+                    <p class="sh-clear-text" id="sh-delete-user-text">
+                        <strong id="sh-delete-user-name"></strong> will be removed and can no longer sign in.
+                        <span id="sh-delete-user-sites"></span>
+                    </p>
+                    <div class="sh-clear-buttons">
+                        <button type="button" class="sh-clear-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-clear-confirm">Yes, delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

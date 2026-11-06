@@ -1,0 +1,585 @@
+@model Group_1_SmartHydro_MVC.Models.GalleryViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " Gallery";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/camera.css" asp-append-version="true" />
+}
+
+<div class="sh-gallery" id="sh-gallery" data-today="@Model.TodayKey" data-favourite-url="@Url.Action("Favourite", "Camera")" data-edit-url="@Url.Action("Edit", "Camera")">
+    @Html.AntiForgeryToken()
+    <div class="sh-gallery-actions">
+        <button type="button" class="sh-gallery-btn" id="sh-add-photo" data-bs-toggle="modal" data-bs-target="#sh-add-modal">
+            <span class="material-symbols-outlined" aria-hidden="true">add_a_photo</span>
+            Add photo
+        </button>
+    </div>
+
+    <section class="sh-gallery-panel" aria-labelledby="sh-search-title">
+        <div class="sh-gallery-panel-head">
+            <div>
+                <h2 class="sh-gallery-title" id="sh-search-title">Search captures</h2>
+                <p class="sh-gallery-sub">Find photos by date, plant, structure, or keyword.</p>
+            </div>
+            <button type="button" class="sh-pill-btn" id="sh-clear-all">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                Clear
+            </button>
+        </div>
+
+        <label class="visually-hidden" for="sh-search-input">Search photos</label>
+        <div class="sh-search">
+            <span class="material-symbols-outlined sh-search-icon" aria-hidden="true">search</span>
+            <input type="search" class="sh-search-input" id="sh-search-input" placeholder="Search photos..." autocomplete="off" />
+            <button type="button" class="sh-search-clear" id="sh-search-clear" aria-label="Clear search">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+        </div>
+
+        <div class="sh-chips" role="group" aria-label="Filter captures">
+            <div class="dropdown">
+                <button type="button" class="sh-chip is-active" data-facet="date" data-default-label="Date" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                    <span class="sh-chip-label">Date</span>
+                </button>
+                <ul class="dropdown-menu sh-menu">
+                    <li><button type="button" class="dropdown-item active" data-facet="date" data-value="any">Any date</button></li>
+                    <li><button type="button" class="dropdown-item" data-facet="date" data-value="today">Today</button></li>
+                    <li><button type="button" class="dropdown-item" data-facet="date" data-value="yesterday">Yesterday</button></li>
+                    <li><button type="button" class="dropdown-item" data-facet="date" data-value="last7">Last 7 days</button></li>
+                    <li><button type="button" class="dropdown-item" data-facet="date" data-value="last30">Last 30 days</button></li>
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="sh-chip" data-facet="plant" data-default-label="Plant type" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">eco</span>
+                    <span class="sh-chip-label">Plant type</span>
+                </button>
+                <ul class="dropdown-menu sh-menu">
+                    <li><button type="button" class="dropdown-item active" data-facet="plant" data-value="">All plants</button></li>
+                    @foreach (var plant in Model.Plants)
+                    {
+                        <li><button type="button" class="dropdown-item" data-facet="plant" data-value="@plant">@plant</button></li>
+                    }
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="sh-chip" data-facet="structure" data-default-label="Structure" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+                    <span class="sh-chip-label">Structure</span>
+                </button>
+                <ul class="dropdown-menu sh-menu">
+                    <li><button type="button" class="dropdown-item active" data-facet="structure" data-value="">All structures</button></li>
+                    @foreach (var structure in Model.Structures)
+                    {
+                        <li><button type="button" class="dropdown-item" data-facet="structure" data-value="@structure">@structure</button></li>
+                    }
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="sh-chip" data-facet="camera" data-default-label="Camera" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+                    <span class="sh-chip-label">Camera</span>
+                </button>
+                <ul class="dropdown-menu sh-menu">
+                    <li><button type="button" class="dropdown-item active" data-facet="camera" data-value="">All cameras</button></li>
+                    @foreach (var camera in Model.Cameras)
+                    {
+                        <li><button type="button" class="dropdown-item" data-facet="camera" data-value="@camera">@camera</button></li>
+                    }
+                </ul>
+            </div>
+
+            <button type="button" class="sh-chip" id="sh-chip-favourites" aria-pressed="false">
+                <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                <span class="sh-chip-label">Favorites</span>
+            </button>
+        </div>
+
+        <div class="sh-results-head">
+            <strong>Recent results</strong>
+            <span id="sh-result-count" aria-live="polite">@Model.Captures.Count captures</span>
+        </div>
+
+        <div class="sh-results" id="sh-results" tabindex="0" aria-label="Recent captures">
+            @foreach (var capture in Model.Captures)
+            {
+                <button type="button" class="sh-capture-card"
+                        data-id="@capture.Id"
+                        data-title="@capture.Title"
+                        data-plant="@capture.Plant"
+                        data-structure="@capture.Structure"
+                        data-camera="@capture.Camera"
+                        data-date="@Model.DateKey(capture)"
+                        data-when="@Model.WhenLabel(capture)"
+                        data-full="@Model.FullLabel(capture)"
+                        data-favourite="@capture.IsFavourite.ToString().ToLowerInvariant()"
+                        data-image="@capture.ImageUrl"
+                        data-download="@Url.Action("Download", "Camera", new { id = capture.Id })"
+                        data-search="@Model.SearchText(capture)">
+                    <span class="sh-capture-thumb">
+                        @if (!string.IsNullOrWhiteSpace(capture.ImageUrl))
+                        {
+                            <img class="sh-capture-img" src="@capture.ImageUrl" alt="@capture.Title" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="material-symbols-outlined sh-capture-placeholder-icon" aria-hidden="true">image</span>
+                        }
+                        @if (capture.IsFavourite)
+                        {
+                            <span class="sh-capture-fav" title="Favorite">
+                                <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">star</span>
+                            </span>
+                        }
+                    </span>
+                    <span class="sh-capture-body">
+                        <span class="sh-capture-title">@capture.Title</span>
+                        <span class="sh-capture-meta">@Model.WhenLabel(capture)</span>
+                    </span>
+                </button>
+            }
+
+            <p class="sh-results-empty" id="sh-results-none" hidden>No photos yet. Use Add photo to upload one or take one with a camera.</p>
+            <p class="sh-results-empty" id="sh-results-empty" hidden>No captures match your search. Try another word or clear the filters.</p>
+        </div>
+    </section>
+
+    <section class="sh-gallery-panel" aria-labelledby="sh-browse-title">
+        <div class="sh-gallery-panel-head">
+            <div>
+                <h2 class="sh-gallery-title" id="sh-browse-title">Browse by date</h2>
+                <p class="sh-gallery-sub">Highlighted dates show available captures.</p>
+            </div>
+            <div class="dropdown">
+                <button type="button" class="sh-pill-btn is-dark" id="sh-month-button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span id="sh-month-label">This month</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end sh-menu sh-month-menu" id="sh-month-menu"></ul>
+            </div>
+        </div>
+
+        <div class="sh-cal-nav">
+            <button type="button" class="sh-cal-arrow" id="sh-cal-prev" aria-label="Previous month">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+            </button>
+            <div class="sh-cal-heading">
+                <div class="sh-cal-month" id="sh-cal-month" aria-live="polite"></div>
+                <div class="sh-cal-sub" id="sh-cal-sub"></div>
+            </div>
+            <button type="button" class="sh-cal-arrow" id="sh-cal-next" aria-label="Next month">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            </button>
+        </div>
+
+        <div class="sh-cal-weekdays" aria-hidden="true">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="sh-cal-days" id="sh-cal-days"></div>
+    </section>
+</div>
+
+<div class="modal fade sh-add-modal" id="sh-add-modal" tabindex="-1" aria-labelledby="sh-add-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="sh-modal-heading">
+                    <span class="sh-modal-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">add_a_photo</span></span>
+                    <div class="sh-modal-heading-text">
+                        <h2 class="modal-title" id="sh-add-title">Add a photo</h2>
+                        <p class="sh-modal-sub" id="sh-add-sub">How would you like to add it?</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="sh-add-choose">
+                    <div class="sh-add-options">
+                        <button type="button" class="sh-add-option" id="sh-choose-upload">
+                            <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">upload_file</span></span>
+                            <span class="sh-add-option-copy">
+                                <span class="sh-add-option-title">Upload a file</span>
+                                <span class="sh-add-option-text">Choose a photo from this device.</span>
+                            </span>
+                            <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                        </button>
+                        @if (Model.BoardCameras.Count == 1)
+                        {
+                            var onlyCamera = Model.BoardCameras[0];
+                            <a class="sh-add-option" id="sh-choose-board-camera" asp-controller="Camera" asp-action="DeviceCamera" asp-route-camera="@onlyCamera.StructureId">
+                                <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span></span>
+                                <span class="sh-add-option-copy">
+                                    <span class="sh-add-option-title">Take photo with @onlyCamera.CameraName</span>
+                                    <span class="sh-add-option-text">On-demand photo from @onlyCamera.StructureName.</span>
+                                </span>
+                                <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                            </a>
+                        }
+                        else if (Model.BoardCameras.Count > 1)
+                        {
+                            <button type="button" class="sh-add-option" id="sh-choose-live">
+                                <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span></span>
+                                <span class="sh-add-option-copy">
+                                    <span class="sh-add-option-title">ESP32 Camera</span>
+                                    <span class="sh-add-option-text">Choose a structure and take an on-demand photo with its ESP32-CAM.</span>
+                                </span>
+                                <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                            </button>
+                        }
+                        @* No ESP32-CAM option when none of the site's structures has a camera linked to it *@
+                    </div>
+                </div>
+
+                @if (Model.BoardCameras.Count > 1)
+                {
+                    <div id="sh-add-live" hidden>
+                        <div class="sh-add-options">
+                            @foreach (var boardCamera in Model.BoardCameras)
+                            {
+                                <a class="sh-add-option" asp-controller="Camera" asp-action="DeviceCamera" asp-route-camera="@boardCamera.StructureId">
+                                    <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span></span>
+                                    <span class="sh-add-option-copy">
+                                        <span class="sh-add-option-title">@boardCamera.StructureName</span>
+                                        <span class="sh-add-option-text">@boardCamera.CameraName</span>
+                                    </span>
+                                    <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                                </a>
+                            }
+                        </div>
+                        <div class="sh-modal-actions">
+                            <button type="button" class="sh-btn-outline" id="sh-add-live-back">
+                                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                                Back
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <form id="sh-add-upload" method="post" enctype="multipart/form-data" asp-controller="Camera" asp-action="Upload" hidden>
+                    <label class="sh-dropzone" id="sh-dropzone" for="sh-photo-input">
+                        <input type="file" class="visually-hidden" id="sh-photo-input" name="photo" accept="image/jpeg,image/png,image/webp" />
+                        <img class="sh-dropzone-preview" id="sh-dropzone-preview" alt="Preview of the chosen photo" hidden />
+                        <span class="material-symbols-outlined sh-dropzone-icon" aria-hidden="true">cloud_upload</span>
+                        <span class="sh-dropzone-title" id="sh-dropzone-title">Choose a photo or drop it here</span>
+                        <span class="sh-dropzone-hint">JPEG, PNG or WebP, up to 10 MB</span>
+                    </label>
+
+                    <div class="sh-add-fields">
+                        <div class="sh-add-field-full">
+                            <label class="sh-add-label" for="sh-upload-date-trigger">Date taken</label>
+                            <div class="sh-date-field" id="sh-upload-date-field" data-max="@Model.TodayKey" data-placeholder="Select a date">
+                                <input type="hidden" id="sh-upload-date" name="takenAt" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-upload-structure">Structure</label>
+                            <select class="form-select" id="sh-upload-structure" name="structure">
+                                <option value="">Choose a structure</option>
+                                @foreach (var structureName in Model.UploadStructures)
+                                {
+                                    <option value="@structureName">@structureName</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-upload-plant">Plant <span>(optional)</span></label>
+                            <input type="text" class="form-control" id="sh-upload-plant" name="plant" maxlength="60" autocomplete="off" />
+                        </div>
+                        <div class="sh-add-field-full">
+                            <label class="sh-fav-check" for="sh-upload-favourite">
+                                <input type="checkbox" class="visually-hidden" id="sh-upload-favourite" name="favourite" value="true" />
+                                <span class="sh-fav-check-icon" aria-hidden="true">
+                                    <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                                </span>
+                                <span class="sh-fav-check-text">
+                                    <span class="sh-fav-check-title">Add to favorites</span>
+                                    <span class="sh-fav-check-hint">Find it quickly with the Favorites filter</span>
+                                </span>
+                                <span class="sh-switch" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="sh-add-error" id="sh-add-error" role="alert" hidden></p>
+
+                    <div class="sh-modal-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-add-back">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                            Back
+                        </button>
+                        <button type="submit" class="sh-gallery-btn sh-add-submit" id="sh-add-submit" disabled>
+                            <span class="material-symbols-outlined" aria-hidden="true">upload</span>
+                            <span id="sh-add-submit-text">Upload photo</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-capture-modal" id="sh-capture-modal" tabindex="-1" aria-labelledby="sh-capture-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="sh-capture-heading">
+                    <h2 class="modal-title" id="sh-capture-modal-title"></h2>
+                    <p class="sh-capture-taken" id="sh-capture-full"></p>
+                </div>
+                <div class="sh-capture-header-actions">
+                    <button type="button" class="sh-fav-toggle" id="sh-fav-toggle" aria-pressed="false">
+                        <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                        <span id="sh-fav-toggle-label">Add to favorites</span>
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="sh-capture-preview" id="sh-capture-preview">
+                    <img id="sh-capture-backdrop" class="sh-capture-preview-backdrop" alt="" aria-hidden="true" hidden />
+                    <img id="sh-capture-image" class="sh-capture-preview-img" alt="" hidden />
+                    <span class="material-symbols-outlined" id="sh-capture-placeholder" aria-hidden="true">image</span>
+                </div>
+                <dl class="sh-capture-details">
+                    <div>
+                        <dt><span class="material-symbols-outlined" aria-hidden="true">eco</span>Plant</dt>
+                        <dd id="sh-capture-plant"></dd>
+                    </div>
+                    <div>
+                        <dt><span class="material-symbols-outlined" aria-hidden="true">grid_view</span>Structure</dt>
+                        <dd id="sh-capture-structure"></dd>
+                    </div>
+                    <div>
+                        <dt><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>Camera</dt>
+                        <dd id="sh-capture-camera"></dd>
+                    </div>
+                    <div>
+                        <dt><span class="material-symbols-outlined" aria-hidden="true">star</span>Favorite</dt>
+                        <dd id="sh-capture-favourite"></dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="modal-footer sh-capture-footer">
+                <button type="button" class="sh-btn-danger-outline" id="sh-delete-start">
+                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                    Delete photo
+                </button>
+
+                <span class="sh-capture-divider" aria-hidden="true"></span>
+
+                <button type="button" class="sh-btn-outline sh-btn-edit-outline" id="sh-edit-start">
+                    <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                    Edit photo
+                </button>
+
+                <span class="sh-capture-divider" id="sh-capture-divider" aria-hidden="true"></span>
+
+                <a class="sh-gallery-btn sh-capture-download" id="sh-capture-download" href="#" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                    Download photo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-add-modal sh-edit-modal" id="sh-edit-modal" tabindex="-1" aria-labelledby="sh-edit-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="sh-modal-heading">
+                    <span class="sh-modal-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">edit</span></span>
+                    <div class="sh-modal-heading-text">
+                        <h2 class="modal-title" id="sh-edit-title">Edit photo</h2>
+                        <p class="sh-modal-sub" id="sh-edit-sub">Change the photo or update its details.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="sh-edit-details" novalidate>
+                    <div class="sh-capture-preview sh-edit-preview">
+                        <img class="sh-capture-preview-img" id="sh-edit-preview" alt="Current photo" />
+                        <span class="sh-edit-new-badge" id="sh-edit-new-badge" hidden>New photo</span>
+                    </div>
+                    <button type="button" class="sh-btn-outline sh-edit-change" id="sh-edit-change">
+                        <span class="material-symbols-outlined" aria-hidden="true">add_a_photo</span>
+                        <span id="sh-edit-change-text">Change photo</span>
+                    </button>
+
+                    <div class="sh-add-fields">
+                        <div class="sh-add-field-full">
+                            <label class="sh-add-label" for="sh-edit-date-trigger">Date taken</label>
+                            <div class="sh-date-field" id="sh-edit-date-field" data-max="@Model.TodayKey" data-placeholder="Select a date">
+                                <input type="hidden" id="sh-edit-date" name="takenAt" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-edit-structure">Structure</label>
+                            <select class="form-select" id="sh-edit-structure" name="structure">
+                                <option value="">Choose a structure</option>
+                                @foreach (var structureName in Model.UploadStructures)
+                                {
+                                    <option value="@structureName">@structureName</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-edit-plant">Plant <span>(optional)</span></label>
+                            <input type="text" class="form-control" id="sh-edit-plant" name="plant" maxlength="60" autocomplete="off" />
+                        </div>
+                        <div class="sh-add-field-full">
+                            <label class="sh-fav-check" for="sh-edit-favourite">
+                                <input type="checkbox" class="visually-hidden" id="sh-edit-favourite" name="favourite" value="true" />
+                                <span class="sh-fav-check-icon" aria-hidden="true">
+                                    <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                                </span>
+                                <span class="sh-fav-check-text">
+                                    <span class="sh-fav-check-title">Add to favorites</span>
+                                    <span class="sh-fav-check-hint">Find it quickly with the Favorites filter</span>
+                                </span>
+                                <span class="sh-switch" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="sh-add-error" id="sh-edit-error" role="alert" hidden></p>
+
+                    <div class="sh-modal-actions sh-edit-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-edit-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-gallery-btn sh-add-submit" id="sh-edit-save">
+                            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                            <span id="sh-edit-save-text">Save changes</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="sh-edit-choose" hidden>
+                    <div class="sh-add-options">
+                        <button type="button" class="sh-add-option" id="sh-edit-choose-upload">
+                            <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">upload_file</span></span>
+                            <span class="sh-add-option-copy">
+                                <span class="sh-add-option-title">Upload a file</span>
+                                <span class="sh-add-option-text">Choose a photo from this device.</span>
+                            </span>
+                            <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                        </button>
+                        <button type="button" class="sh-add-option" id="sh-edit-choose-camera">
+                            <span class="sh-add-option-icon" aria-hidden="true"><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span></span>
+                            <span class="sh-add-option-copy">
+                                <span class="sh-add-option-title">Device camera</span>
+                                <span class="sh-add-option-text">Take a new photo with this device's camera.</span>
+                            </span>
+                            <span class="material-symbols-outlined sh-add-option-arrow" aria-hidden="true">chevron_right</span>
+                        </button>
+                    </div>
+                    <div class="sh-modal-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-edit-choose-back">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                            Back
+                        </button>
+                    </div>
+                </div>
+
+                <div id="sh-edit-upload" hidden>
+                    <label class="sh-dropzone" id="sh-edit-dropzone" for="sh-edit-file">
+                        <input type="file" class="visually-hidden" id="sh-edit-file" accept="image/jpeg,image/png,image/webp" />
+                        <img class="sh-dropzone-preview" id="sh-edit-drop-preview" alt="Preview of the chosen photo" hidden />
+                        <span class="material-symbols-outlined sh-dropzone-icon" aria-hidden="true">cloud_upload</span>
+                        <span class="sh-dropzone-title" id="sh-edit-drop-title">Choose a photo or drop it here</span>
+                        <span class="sh-dropzone-hint">JPEG, PNG or WebP, up to 10 MB</span>
+                    </label>
+                    <p class="sh-add-error" id="sh-edit-upload-error" role="alert" hidden></p>
+                    <div class="sh-modal-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-edit-upload-back">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                            Back
+                        </button>
+                        <button type="button" class="sh-gallery-btn sh-add-submit" id="sh-edit-upload-use" disabled>
+                            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                            Use this photo
+                        </button>
+                    </div>
+                </div>
+
+                <div id="sh-edit-camera" hidden>
+                    <div class="sh-edit-cam" id="sh-edit-cam">
+                        <video class="sh-edit-cam-video" id="sh-edit-cam-video" aria-label="Camera preview" autoplay playsinline muted></video>
+                        <canvas id="sh-edit-cam-canvas" hidden></canvas>
+                        <div class="sh-live-message" id="sh-edit-cam-message" role="status">
+                            <span class="material-symbols-outlined" aria-hidden="true">videocam_off</span>
+                            <p id="sh-edit-cam-message-text">Connecting to the camera...</p>
+                            <button type="button" class="sh-gallery-btn sh-live-retry" id="sh-edit-cam-retry" hidden>Try again</button>
+                        </div>
+                        <button type="button" class="sh-shutter" id="sh-edit-shutter" aria-label="Take a photo" disabled>
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="sh-modal-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-edit-cam-back">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                            Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sh-confirm-modal" id="sh-delete-modal" tabindex="-1" role="alertdialog" aria-labelledby="sh-delete-title" aria-describedby="sh-delete-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <form id="sh-delete-form" method="post" asp-controller="Camera" asp-action="Delete">
+                <input type="hidden" name="id" id="sh-delete-id" value="" />
+                <div class="modal-body">
+                    <span class="sh-confirm-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                    </span>
+                    <h2 class="sh-confirm-title" id="sh-delete-title">Are you sure?</h2>
+                    <p class="sh-confirm-text" id="sh-delete-text">
+                        <strong id="sh-delete-name"></strong> will be permanently deleted. This can't be undone.
+                    </p>
+                    <div class="sh-confirm-buttons">
+                        <button type="button" class="sh-btn-outline" id="sh-delete-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="sh-btn-danger" id="sh-delete-submit">Yes, delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (TempData["CameraMessage"] is string cameraMessage)
+{
+    <div id="sh-flash" data-kind="success" data-message="@cameraMessage" data-undo-id="@TempData["CameraUndoId"]" data-undo-url="@Url.Action("Restore", "Camera")" hidden></div>
+}
+else if (TempData["CameraError"] is string cameraError)
+{
+    <div id="sh-flash" data-kind="error" data-message="@cameraError" hidden></div>
+}
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast sh-toast" id="sh-toast" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="4000">
+        <div class="sh-toast-inner">
+            <span class="sh-toast-icon" aria-hidden="true">
+                <span class="material-symbols-outlined" id="sh-toast-icon" aria-hidden="true">check</span>
+            </span>
+            <div class="toast-body" id="sh-toast-body"></div>
+            <button type="button" class="sh-toast-close" data-bs-dismiss="toast" aria-label="Close">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/date-field.js" asp-append-version="true"></script>
+    <script src="~/js/camera.js" asp-append-version="true"></script>
+}

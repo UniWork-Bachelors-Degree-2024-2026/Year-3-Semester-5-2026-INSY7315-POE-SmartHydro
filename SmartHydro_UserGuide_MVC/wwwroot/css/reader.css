@@ -1,0 +1,20 @@
+/* Read aloud buttons in the top bar. They reuse the round theme toggle look; this file only spaces them and shows the pressed state. */
+.sh-reader-btn {
+    margin-left: 0.5rem;
+}
+
+.sh-reader-btn[hidden] {
+    display: none;
+}
+
+.sh-reader-toggle[aria-pressed="true"] {
+    border-color: var(--sh-ink-fill);
+    background: var(--sh-ink-fill);
+    color: var(--sh-on-accent);
+}
+
+    .sh-reader-toggle[aria-pressed="true"]:hover {
+        border-color: var(--sh-ink-fill-hover);
+        background: var(--sh-ink-fill-hover);
+        color: var(--sh-on-accent);
+    }

@@ -1,0 +1,108 @@
+﻿.sh-clear-modal .modal-content {
+    overflow: hidden;
+    border: 1px solid var(--sh-border);
+    border-radius: 18px;
+    background: var(--sh-card-bg);
+    box-shadow: 0 24px 64px var(--sh-modal-shadow);
+}
+
+.sh-clear-modal.fade .modal-dialog {
+    transform: translateY(14px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sh-clear-modal.show .modal-dialog {
+    transform: none;
+}
+
+.sh-clear-modal .modal-body {
+    padding: 1.6rem 1.5rem 1.35rem;
+    text-align: center;
+}
+
+.sh-clear-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 0.85rem;
+    border-radius: 50%;
+    background: var(--sh-danger-soft);
+    color: var(--sh-danger);
+}
+
+    .sh-clear-icon .material-symbols-outlined {
+        font-size: 28px;
+    }
+
+.sh-clear-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sh-text);
+}
+
+.sh-clear-text {
+    margin: 0 0 1.3rem;
+    font-size: 0.86rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-clear-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.sh-clear-cancel,
+.sh-clear-confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--sh-radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+    .sh-clear-cancel:focus-visible,
+    .sh-clear-confirm:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 2px;
+    }
+
+.sh-clear-cancel {
+    border: 1px solid var(--sh-border-strong);
+    background: var(--sh-surface);
+    color: var(--sh-text);
+}
+
+    .sh-clear-cancel:hover {
+        background: var(--sh-surface-hover);
+    }
+
+.sh-clear-confirm {
+    border: 1px solid var(--sh-danger-fill);
+    background: var(--sh-danger-fill);
+    color: var(--sh-on-accent);
+}
+
+    .sh-clear-confirm:hover {
+        border-color: var(--sh-danger-fill-hover);
+        background: var(--sh-danger-fill-hover);
+    }
+
+.modal-backdrop.sh-delete-backdrop {
+    --bs-backdrop-opacity: 0;
+}
+
+#sh-delete-structure-modal .modal-content {
+    box-shadow: 0 24px 64px rgba(15, 32, 22, 0.4), 0 0 0 1px rgba(15, 32, 22, 0.08);
+}
+
+#sh-delete-structure-modal .sh-clear-text {
+    color: var(--sh-text);
+}

@@ -1,0 +1,9 @@
+UPDATE structures
+SET is_deleted = TRUE, deleted_at = NOW(), deleted_by_email = 'system'
+WHERE site_id IN ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')
+  AND is_deleted = FALSE;
+
+UPDATE sites
+SET is_deleted = TRUE
+WHERE id IN ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')
+  AND is_deleted = FALSE;

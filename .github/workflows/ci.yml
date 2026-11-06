@@ -1,0 +1,357 @@
+# Runs the API, MVC and Android tests on every pull request and push to main.
+# A push to main only deploys the API or MVC to Azure once the tests have passed.
+# The user guide site is built on every change and deployed from main once it builds.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # Runs every test and on main redeploys all web apps
+  workflow_dispatch:
+
+# A newer push to the same PR cancels the older run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # Works out which parts of the repo changed, so each job only runs when it needs to
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      dotnet: ${{ steps.filter.outputs.dotnet }}
+      api: ${{ steps.filter.outputs.api }}
+      mvc: ${{ steps.filter.outputs.mvc }}
+      userguide: ${{ steps.filter.outputs.userguide }}
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          token: ''
+          base: ${{ github.base_ref }}
+          filters: |
+            api:
+              - 'SmartHydroAPI/**'
+            mvc:
+              - 'Group_1_SmartHydro_MVC/**'
+            userguide:
+              - 'SmartHydro_UserGuide_MVC/**'
+              - '.github/workflows/ci.yml'
+            dotnet:
+              - 'SmartHydroAPI/**'
+              - 'SmartHydroAPI_Tests/**'
+              - 'Group_1_SmartHydro_MVC/**'
+              - 'Group_1_SmartHydro_MVC_Tests/**'
+              - 'SmartHydro.slnx'
+              - 'global.json'
+              - '.github/workflows/ci.yml'
+            android:
+              - 'SmartHydro_Android/**'
+              - '.github/workflows/ci.yml'
+
+  # Builds the whole solution and runs the API and MVC tests
+  dotnet-test:
+    name: .NET tests
+    needs: changes
+    if: needs.changes.outputs.dotnet == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore SmartHydro.slnx
+
+      - name: Build
+        run: dotnet build SmartHydro.slnx -c Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test SmartHydro.slnx -c Release --no-build
+          --logger trx
+          --results-directory TestResults
+          --collect "XPlat Code Coverage"
+
+      # Shows each test's pass or fail as a check on the PR
+      - name: Test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: .NET test results
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+
+      - name: Upload test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: TestResults
+          retention-days: 14
+
+  # Builds the user guide site and keeps the output for the deploy
+  userguide-build:
+    name: User guide build
+    needs: changes
+    if: needs.changes.outputs.userguide == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Publish
+        run: dotnet publish SmartHydro_UserGuide_MVC -c Release -o ${{ runner.temp }}/userguide
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: userguide-build
+          path: ${{ runner.temp }}/userguide
+          retention-days: 7
+
+  # Runs the Android tests and checks the app builds
+  android-test:
+    name: Android tests
+    needs: changes
+    if: needs.changes.outputs.android == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    defaults:
+      run:
+        working-directory: SmartHydro_Android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Unit tests and debug build
+        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace
+
+      - name: Test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Android test results
+          path: SmartHydro_Android/app/build/test-results/testDebugUnitTest/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-report
+          path: SmartHydro_Android/app/build/reports/tests/testDebugUnitTest
+          retention-days: 14
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smarthydro-debug-apk
+          path: SmartHydro_Android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+  # Checks the Android code for issues but won't fail the build
+  android-lint:
+    name: Android lint (non-blocking)
+    needs: changes
+    if: needs.changes.outputs.android == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: SmartHydro_Android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Lint
+        run: ./gradlew lintDebug
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-lint-report
+          path: SmartHydro_Android/app/build/reports/lint-results-debug.html
+          retention-days: 14
+
+  # Deploys the API from main, after the tests pass
+  deploy-api:
+    name: Deploy API
+    needs: [changes, dotnet-test]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      needs.dotnet-test.result == 'success' &&
+      (
+        (github.event_name == 'push' && needs.changes.outputs.api == 'true') ||
+        github.event_name == 'workflow_dispatch'
+      )
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    concurrency:
+      group: deploy-api
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Publish
+        run: dotnet publish SmartHydroAPI/SmartHydroAPI.csproj -c Release -o ${{ runner.temp }}/api
+
+      - name: Deploy to Azure App Service
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: smarthydroapi
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ runner.temp }}/api
+
+  # Deploys the MVC site
+  deploy-mvc:
+    name: Deploy MVC
+    needs: [changes, dotnet-test]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      needs.dotnet-test.result == 'success' &&
+      (
+        (github.event_name == 'push' && needs.changes.outputs.mvc == 'true') ||
+        github.event_name == 'workflow_dispatch'
+      )
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    concurrency:
+      group: deploy-mvc
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Publish
+        run: dotnet publish Group_1_SmartHydro_MVC/Group_1_SmartHydro_MVC.csproj -c Release -o ${{ runner.temp }}/mvc
+
+      - name: Deploy to Azure App Service
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: smarthydromvc
+          publish-profile: ${{ secrets.AZURE_MVC_PUBLISH_PROFILE }}
+          package: ${{ runner.temp }}/mvc
+
+  # Deploys the user guide site
+  deploy-userguide:
+    name: Deploy user guide
+    needs: [changes, userguide-build]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      needs.userguide-build.result == 'success' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    concurrency:
+      group: deploy-userguide
+      cancel-in-progress: false
+    steps:
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: userguide-build
+          path: ${{ runner.temp }}/userguide
+
+      - name: Deploy to Azure App Service
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: smarthydrouserguide
+          publish-profile: ${{ secrets.AZURE_USERGUIDE_PUBLISH_PROFILE }}
+          package: ${{ runner.temp }}/userguide

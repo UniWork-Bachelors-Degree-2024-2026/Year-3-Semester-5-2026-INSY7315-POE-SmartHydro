@@ -1,0 +1,77 @@
+@model Group_1_SmartHydro_MVC.Models.StructureViewModel
+
+@{
+    var iconClass = "sh-structure-icon";
+
+    var badgeText = "Hydroponic";
+    if (Model.Type == StructureType.Fodder)
+    {
+        badgeText = "Fodder";
+    }
+    if (StructureLabelColours.IsValid(Model.LabelColour))
+    {
+        iconClass = iconClass + " sh-label-" + Model.LabelColour;
+    }
+
+    // Readings the API has not reported yet are shown quietly instead of in bold
+    var temperatureClass = Model.Temperature == "No Data" ? "sh-reading-empty" : "";
+    var humidityClass = Model.Humidity == "No Data" ? "sh-reading-empty" : "";
+    var ecClass = Model.Ec == "No Data" ? "sh-reading-empty" : "";
+    var phClass = Model.Ph == "No Data" ? "sh-reading-empty" : "";
+}
+
+<span class="@iconClass" aria-hidden="true">
+    @if (Model.IconIsMaterialSymbol)
+    {
+        <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@Model.IconName</span>
+    }
+    else
+    {
+        <i class="@Model.IconName"></i>
+    }
+</span>
+
+<div class="sh-structure-body">
+    <div class="sh-structure-heading">
+        <div class="sh-structure-name">@Model.Name</div>
+        <span class="sh-badge">@badgeText</span>
+        <span class="sh-structure-location-inline" title="Controller ID (MAC address)">
+            <span class="material-symbols-outlined" aria-hidden="true">memory</span>
+            <span class="visually-hidden">MAC address:</span>
+            @if (!string.IsNullOrWhiteSpace(Model.MacAddress))
+            {
+                <span class="sh-mac-text">@Model.MacAddress</span>
+            }
+            else
+            {
+                <span class="sh-stat-value-empty">No MAC address</span>
+            }
+        </span>
+    </div>
+    <div class="sh-structure-status">
+        <span class="sh-structure-dot" aria-hidden="true"></span>
+        <span class="sh-structure-status-text">@Model.StatusText</span>
+        @if (!string.IsNullOrWhiteSpace(Model.StatusNote))
+        {
+            <span class="sh-structure-note">@Model.StatusNote</span>
+        }
+    </div>
+    <dl class="sh-structure-readings">
+        <div>
+            <dt>Temperature</dt>
+            <dd class="@temperatureClass">@Model.Temperature</dd>
+        </div>
+        <div>
+            <dt>Humidity</dt>
+            <dd class="@humidityClass">@Model.Humidity</dd>
+        </div>
+        <div>
+            <dt>Nutrients (EC)</dt>
+            <dd class="@ecClass">@Model.Ec</dd>
+        </div>
+        <div>
+            <dt>Acidity (pH)</dt>
+            <dd class="@phClass">@Model.Ph</dd>
+        </div>
+    </dl>
+</div>

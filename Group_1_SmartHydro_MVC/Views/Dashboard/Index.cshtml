@@ -1,0 +1,265 @@
+@model Group_1_SmartHydro_MVC.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " Structure Readings";
+
+}
+
+@if (TempData["OfflineSuccess"] is string offlineSuccess)
+{
+    <div class="sh-flash" role="status" style="margin-bottom: 1rem;">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>@offlineSuccess</span>
+    </div>
+}
+
+@if (TempData["OfflineError"] is string offlineError)
+{
+    <div class="sh-flash sh-flash-muted" role="alert" style="margin-bottom: 1rem;">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>@offlineError</span>
+    </div>
+}
+
+<div class="sh-status-header">
+    <div>
+        <h2 class="sh-status-title">@Model.Structure.Name Status</h2>
+        <span class="sh-status-subtitle" id="sh-dashboard-subtitle">@Model.StatusSubtitle</span>
+        @if (!Model.IsOnline && Model.CanControl)
+        {
+            <div class="sh-status-subtitle" id="sh-offline-hint" style="margin-top: 0.25rem;">The controller isn't reporting right now. Switches and doses may not work until it is back online.</div>
+        }
+    </div>
+    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        @if (Model.CanChangeMode && !string.IsNullOrWhiteSpace(Model.Structure.MacAddress))
+        {
+            <form asp-controller="Controls" asp-action="TriggerLoraMode" method="post" class="d-inline sh-mode-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="structureId" value="@Model.Structure.Id" />
+                <button type="submit" class="sh-lora-btn" data-mode="0" aria-pressed="false" title="Use the normal long-range radio connection (LoRa)">
+                    <span class="material-symbols-outlined" aria-hidden="true">cell_tower</span>
+                    LoRa Mode
+                </button>
+            </form>
+            <form asp-controller="Controls" asp-action="TriggerOnlineMode" method="post" class="d-inline sh-mode-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="structureId" value="@Model.Structure.Id" />
+                <button type="submit" class="sh-online-btn" data-mode="1" aria-pressed="false" title="Connect the controller to Wi-Fi to send live data">
+                    <span class="material-symbols-outlined" aria-hidden="true">wifi</span>
+                    Online Mode
+                </button>
+            </form>
+            <form asp-controller="Controls" asp-action="TriggerOfflineMode" method="post" class="d-inline sh-mode-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="structureId" value="@Model.Structure.Id" />
+                <button type="submit" class="sh-offline-btn" data-mode="2" aria-pressed="false" title="Start the controller's own Wi-Fi hotspot for local setup">
+                    <span class="material-symbols-outlined" aria-hidden="true">router</span>
+                    SoftAP Mode
+                </button>
+            </form>
+        }
+        @if (Model.IsOnline)
+        {
+            <span class="sh-live-status" id="sh-live-connection-pill">
+                <span class="material-symbols-outlined" aria-hidden="true" id="sh-live-connection-icon">cloud_done</span>
+                <span id="sh-live-connection-text">Online System</span>
+            </span>
+        }
+        else
+        {
+            <span class="sh-live-status is-offline" id="sh-live-connection-pill">
+                <span class="material-symbols-outlined" aria-hidden="true" id="sh-live-connection-icon">wifi_off</span>
+                <span id="sh-live-connection-text">Not Reporting</span>
+            </span>
+        }
+    </div>
+</div>
+
+<partial name="_ConnectivityStatus" model='Url.Action("ModeState", "Controls", new { structureId = Model.Structure.Id })' />
+
+
+<div class="sh-dashboard-layout" data-structure-type="@Model.Structure.Type.ToString().ToLowerInvariant()" data-structure-id="@Model.Structure.Id" data-device-mac="@Model.Structure.MacAddress" data-control-url="@Url.Action("Set", "Controls")">
+    @Html.AntiForgeryToken()
+    <div class="sh-grid sh-grid-2">
+        @foreach (var card in Model.Cards)
+        {
+            var valueClass = "sh-dashboard-value";
+            if (card.Value == "No data yet")
+            {
+                valueClass = "sh-dashboard-value sh-stat-value-empty";
+            }
+            else if (card.ValueIsText)
+            {
+                valueClass = "sh-dashboard-value sh-dashboard-value-text";
+            }
+
+            var controlValueClass = "sh-control-state off";
+            var controlValueText = "OFF";
+            if (card.ControlOn)
+            {
+                controlValueClass = "sh-control-state on";
+                controlValueText = "ON";
+            }
+
+            string? checkedAttribute = null;
+            if (card.ControlOn)
+            {
+                checkedAttribute = "checked";
+            }
+
+            string? disabledAttribute = null;
+            string? toggleTitle = null;
+            if (!Model.CanControl || string.IsNullOrEmpty(card.ControlKey) || string.IsNullOrEmpty(Model.Structure.MacAddress))
+            {
+                disabledAttribute = "disabled";
+            }
+
+            if (!Model.CanControl)
+            {
+                toggleTitle = "You do not have permission to change controls";
+            }
+
+            var clickableClass = "";
+            if (!string.IsNullOrEmpty(card.LinkController))
+            {
+                clickableClass = "sh-dashboard-card-clickable";
+            }
+
+            <div class="sh-card sh-dashboard-card @card.IconColorClass @clickableClass" data-card-action="@card.LinkAction" role="group" aria-label="@card.Label">
+                <div class="sh-dashboard-card-top">
+                    <div class="sh-stat-row">
+                        <span class="sh-icon-tile sh-icon-stack @card.IconColorClass">
+                            @if (card.IconIsMaterialSymbol)
+                            {
+                                <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@card.IconName</span>
+                            }
+                            else
+                            {
+                                <i class="@card.IconName" aria-hidden="true"></i>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(card.IconText))
+                            {
+                                <span class="sh-icon-stack-text" aria-hidden="true">@card.IconText</span>
+                            }
+                        </span>
+                        <div class="sh-stat-text">
+                            <div class="sh-stat-label">@card.Label</div>
+                            <div class="@valueClass" data-ph-reading-metadata="@(card.LinkAction == "CleanWater" ? "true" : null)"
+                                 data-ph-recorded-at="@card.PhDisplayFallback?.RecordedAt.ToString("O")" data-ph-age-seconds="@card.PhDisplayFallback?.AgeSeconds"
+                                 title="@(card.LinkAction == "CleanWater" ? card.ValueCaption : null)"
+                                 aria-description="@(card.LinkAction == "CleanWater" ? card.ValueCaption : null)">
+                                @card.Value
+                                @if (!string.IsNullOrWhiteSpace(card.Unit))
+                                {
+                                    <span class="sh-dashboard-unit">@card.Unit</span>
+                                }
+                            </div>
+                            @if (card.LinkAction != "CleanWater" && !string.IsNullOrWhiteSpace(card.ValueCaption))
+                            {
+                                <div class="sh-dashboard-caption">@card.ValueCaption</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(card.StatusText))
+                            {
+                                <span class="sh-status-pill @card.StatusLevel">@card.StatusText</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(card.LinkController))
+                    {
+                        <a class="sh-details-link" asp-controller="@card.LinkController" asp-action="@card.LinkAction" asp-route-id="@Model.Structure.Id" aria-label="@card.Label details">
+                            Details <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        </a>
+                    }
+                </div>
+
+                <div class="sh-dashboard-card-bottom">
+                    <div class="sh-dashboard-control">
+                        <div class="sh-stat-value">@card.ControlLabel: <span class="@controlValueClass">@controlValueText</span></div>
+                        <div class="sh-detail-control-caption">@card.ControlCaption</div>
+                    </div>
+                    <div class="sh-control-toggle-group">
+                        <span class="sh-control-tag">@card.ControlTag</span>
+                        @if (card.ControlKey is "ph" or "ec")
+                        {
+                            <label class="sh-toggle">
+                                <input type="checkbox" role="switch" aria-label="Stop @card.ControlLabel" class="sh-control-input" data-stop-dose data-reported-on="@card.ControlOn.ToString().ToLowerInvariant()" data-control-key="@card.ControlKey" checked="@checkedAttribute" disabled="@disabledAttribute" title="To dose, open Details. Switch off to stop both pumps." />
+                                <span class="sh-slider"></span>
+                            </label>
+                        }
+                        else
+                        {
+                        <label class="sh-toggle">
+                            <input type="checkbox" role="switch" aria-label="@card.ControlLabel" class="sh-control-input" data-control-key="@card.ControlKey" checked="@checkedAttribute" disabled="@disabledAttribute" title="@toggleTitle" />
+                            <span class="sh-slider"></span>
+                        </label>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="sh-card sh-alerts-panel">
+        <div class="sh-alerts-header">
+            <span class="sh-stat-value" role="heading" aria-level="3">Today's Alerts</span>
+
+            <div class="dropdown sh-alerts-menu">
+                <button type="button" class="sh-alerts-menu-btn" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" aria-haspopup="true" aria-label="Alert options" title="Alert options">
+                    <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end sh-alerts-menu-panel">
+                    <li>
+                        <a class="dropdown-item" asp-controller="Alerts" asp-action="Index">
+                            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+                            View all alerts
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-controller="Alerts" asp-action="Index" asp-route-status="@AlertStatusFilter.Active">
+                            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+                            Active alerts
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-controller="Alerts" asp-action="Index" asp-route-status="@AlertStatusFilter.Resolved">
+                            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                            Resolved alerts
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index" asp-route-id="@Model.Structure.Id">
+                            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                            Refresh
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        @if (Model.Alerts.Count > 0)
+        {
+            <ul class="sh-alerts-list">
+                @foreach (var alert in Model.Alerts)
+                {
+                    <li class="sh-alert-item">
+                        <span class="sh-icon-tile @alert.IconColorClass sh-alert-icon">
+                            <span class="material-symbols-outlined" aria-hidden="true">@alert.IconName</span>
+                        </span>
+                        <div>
+                            <div class="sh-alert-title">@alert.Title</div>
+                            <div class="sh-alert-time">@alert.Time</div>
+                        </div>
+                    </li>
+                }
+            </ul>
+            <p class="sh-empty-state sh-alerts-end">Nothing more to show...</p>
+        }
+        else
+        {
+            <p class="sh-empty-state">Nothing to show yet.</p>
+        }
+    </div>
+</div>

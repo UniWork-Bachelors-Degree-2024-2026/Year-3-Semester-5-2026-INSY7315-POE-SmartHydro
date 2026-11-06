@@ -1,0 +1,580 @@
+﻿.sh-status-pill.neutral {
+    background: var(--sh-surface-muted);
+    color: var(--sh-text-muted);
+}
+
+.sh-hero-card {
+    gap: 1.75rem;
+    padding: 1.5rem 1.75rem;
+}
+
+.sh-hero-text {
+    min-width: 0;
+}
+
+.sh-hero-card .sh-hero-title {
+    font-size: 2.6rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.sh-hero-card .sh-hero-title-reading {
+    font-size: 1.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.sh-hero-card .sh-hero-status-label {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-top: 0.4rem;
+}
+
+.sh-hero-card .sh-hero-status-value {
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.sh-hero-value {
+    display: block;
+    font-size: 2.6rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--sh-text);
+}
+
+.sh-hero-empty {
+    font-size: 1.35rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--sh-text-muted);
+}
+
+.sh-hero-value.sh-hero-empty {
+    font-size: 1.2rem;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.3;
+    color: var(--sh-text-soft);
+}
+
+.sh-hero-card .sh-hero-status-value.sh-hero-empty {
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1.3;
+    color: var(--sh-text-soft);
+}
+
+.sh-hero-subtitle {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-hero-caption {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    color: var(--sh-text-muted);
+}
+
+.sh-hero-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+}
+
+.sh-hero-action {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 2px solid var(--sh-ink);
+    border-radius: 50%;
+    background: var(--sh-surface);
+    color: var(--sh-ink);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+    .sh-hero-action .material-symbols-outlined {
+        font-size: 26px;
+    }
+
+    .sh-hero-action:hover {
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+    .sh-hero-action.filled {
+        background: var(--sh-ink-fill);
+        color: var(--sh-on-accent);
+    }
+
+        .sh-hero-action.filled:hover {
+            background: var(--sh-ink-fill-hover);
+            border-color: var(--sh-ink-fill-hover);
+        }
+
+    .sh-hero-action:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 2px;
+    }
+
+.sh-hero-action:disabled,
+.sh-hero-action:disabled:hover {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--sh-surface);
+    color: var(--sh-ink);
+}
+
+.sh-hero-action.filled:disabled,
+.sh-hero-action.filled:disabled:hover {
+    background: var(--sh-ink-fill);
+    border-color: var(--sh-ink);
+    color: var(--sh-on-accent);
+}
+
+.sh-dose-status {
+    margin-top: 0.6rem;
+}
+
+.sh-hero-action.sh-dose-direction { width: auto; min-width: 156px; height: auto; min-height: 66px; border-radius: 12px; padding: .65rem 1rem; gap: .6rem; text-align: left; }
+.sh-dose-direction strong, .sh-dose-direction small { display: block; }
+.sh-dose-direction strong { font-size: 1rem; }
+.sh-dose-symbol { font-family: system-ui, sans-serif; font-size: 1.8rem; line-height: 1; }
+.sh-dose-direction small { font-size: .78rem; margin-top: .2rem; font-weight: 400; }
+.sh-dose-explanation { font-size: .85rem; line-height: 1.5; color: var(--sh-text-muted); max-width: 62ch; margin: .9rem 0; }
+.sh-control-card-header { flex-wrap: wrap; gap: .7rem; }
+.sh-pump-state { font-size: .8rem; padding: .35rem .6rem; border-radius: 99px; background: var(--sh-surface-muted); color: var(--sh-text-muted); }
+.sh-stop-dose { border: 1px solid var(--sh-danger); background: var(--sh-surface); color: var(--sh-danger); padding: .45rem .8rem; border-radius: .5rem; font-weight: 600; }
+.sh-stop-dose:disabled { opacity: .5; }
+.sh-activity-summary { font-size: .9rem; margin: .6rem 0; line-height: 1.5; }
+.sh-calculation-details summary { cursor: pointer; color: var(--sh-text-muted); font-size: .8rem; }
+.sh-calculation-details[open] summary { margin-bottom: .65rem; }
+.sh-calculation-details .sh-activity-description { line-height: 1.7; margin: 0 0 .75rem; }
+.sh-calculation-details .sh-activity-description:last-child { margin-bottom: 0; }
+.sh-measurement-notice { padding: .7rem .9rem; border-left: 3px solid var(--sh-danger); background: var(--sh-surface-muted); font-size: .9rem; line-height: 1.5; margin: .8rem 0; }
+.sh-activity-item-row { flex-wrap: wrap; gap: .4rem; }
+.sh-activity-card { max-height: 850px; overflow-y: auto; }
+@media (max-width: 600px) { .sh-hero-card { padding: 1rem; gap: 1rem; } .sh-hero-action.sh-dose-direction { min-width: 140px; flex: 1; } }
+
+.sh-tile-card {
+    padding: 1.25rem;
+}
+
+.sh-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.sh-stat-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    min-height: 150px;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius-lg);
+    background: var(--sh-card-bg);
+}
+
+.sh-stat-tile-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sh-text);
+}
+
+.sh-stat-tile-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--sh-text);
+}
+
+    .sh-stat-tile-value.sh-hero-empty {
+        font-size: 1rem;
+        font-weight: 600;
+        font-style: normal;
+        color: var(--sh-text-soft);
+    }
+
+.sh-stat-tile-unit {
+    margin-left: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--sh-text-muted);
+}
+
+.sh-stat-tile-foot {
+    min-height: 1.4rem;
+}
+
+.sh-trend-card {
+    --trend: var(--sh-blue);
+}
+
+    .sh-trend-card.water {
+        --trend: var(--sh-water);
+    }
+
+    .sh-trend-card.cleanwater {
+        --trend: var(--sh-cleanwater);
+    }
+
+    .sh-trend-card.temp {
+        --trend: var(--sh-temp);
+    }
+
+    .sh-trend-card.sunlight {
+        --trend: var(--sh-sunlight);
+    }
+
+    .sh-trend-card.nutrients {
+        --trend: var(--sh-nutrients);
+    }
+
+    .sh-trend-card.humidity {
+        --trend: var(--sh-humidity);
+    }
+
+    .sh-trend-card .sh-trend-bar {
+        flex-shrink: 0;
+        max-width: 72px;
+        height: calc((100% - 3.4rem) * var(--bar, 0) / 100);
+        background: var(--trend);
+    }
+
+    .sh-trend-card .sh-trend-bar-value,
+    .sh-trend-card .sh-trend-range-dates {
+        color: var(--trend);
+    }
+
+    .sh-trend-card .sh-trend-slider {
+        accent-color: var(--trend);
+    }
+
+.sh-trend-plot {
+    padding: 0.75rem 0.75rem 0.5rem;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius);
+}
+
+.sh-control-card-header .sh-stat-value {
+    font-size: 1.25rem;
+}
+
+.sh-control-hint {
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--sh-border);
+}
+
+@media (max-width: 600px) {
+    .sh-hero-card {
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+
+        .sh-hero-card .sh-hero-icon-tile {
+            width: 88px;
+            height: 88px;
+        }
+
+            .sh-hero-card .sh-hero-icon-tile .material-symbols-outlined,
+            .sh-hero-card .sh-hero-icon-tile i {
+                font-size: 38px;
+            }
+
+        .sh-hero-card .sh-icon-stack-text-lg {
+            --sh-stack-scale: 0.75;
+            --sh-stack-shift: 0.27rem;
+        }
+
+        .sh-hero-card .sh-hero-title,
+        .sh-hero-value {
+            font-size: 1.8rem;
+        }
+
+        .sh-hero-card .sh-hero-title-reading {
+            font-size: 1.4rem;
+        }
+}
+
+@media (max-width: 480px) {
+    .sh-tile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 7-day trend chart drawn with Chart.js  */
+.sh-trend-chart {
+    position: relative;
+    height: 220px;
+}
+
+.sh-trend-card .sh-trend-range-dates {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.sh-trend-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 140px;
+    text-align: center;
+}
+
+.sh-trend-empty-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--sh-text);
+}
+
+.sh-trend-empty-sub {
+    font-size: 0.78rem;
+    color: var(--sh-text-muted);
+}
+
+@media (max-width: 480px) {
+    .sh-trend-chart {
+        height: 190px;
+    }
+}
+
+/* Dose buttons: one clear labelled button per dose, with the fixed volume underneath */
+.sh-dose-actions {
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+    .sh-dose-actions .sh-dose-btn {
+        position: relative;
+        box-sizing: border-box;
+        flex: 0 0 200px;
+        width: 200px;
+        min-height: 66px;
+        justify-content: flex-start;
+    }
+
+        /* The waiting spinner floats over the button so it never changes the button's size */
+        .sh-dose-actions .sh-dose-btn.is-pending::after {
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            margin: -0.4rem 0 0 0;
+        }
+
+.sh-dose-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sh-dose-direction .sh-dose-symbol {
+    flex-shrink: 0;
+    width: 1.6rem;
+    text-align: center;
+}
+
+.sh-dose-direction strong {
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.sh-dose-direction small {
+    margin-top: 0.15rem;
+    opacity: 0.8;
+}
+
+/* Dose status: what is waiting and the last dose, as two labelled rows */
+.sh-dose-explanation {
+    margin: 0.9rem 0 0.7rem;
+}
+
+.sh-dose-rows {
+    display: grid;
+    margin: 0;
+    border: 1px solid var(--sh-border);
+    border-radius: var(--sh-radius-sm);
+    overflow: hidden;
+}
+
+.sh-dose-row {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+}
+
+    .sh-dose-row + .sh-dose-row {
+        border-top: 1px solid var(--sh-border);
+    }
+
+    .sh-dose-row dt {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sh-text-muted);
+    }
+
+    .sh-dose-row dd {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: var(--sh-text);
+        overflow-wrap: anywhere;
+    }
+
+@media (max-width: 600px) {
+    .sh-dose-actions .sh-dose-btn {
+        flex: 1 1 100%;
+        width: auto;
+    }
+
+    .sh-dose-row {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+    }
+}
+
+/* Structure and dashboard readings: even columns, aligned figures */
+.sh-structure-readings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.4rem;
+}
+
+    .sh-structure-readings > div {
+        min-width: 0;
+    }
+
+    .sh-structure-readings dd {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+        .sh-structure-readings dd.sh-reading-empty {
+            font-weight: 500;
+            color: var(--sh-text-muted);
+        }
+
+.sh-dashboard-value {
+    font-variant-numeric: tabular-nums;
+}
+
+.sh-dashboard-unit {
+    margin-left: 0.15rem;
+}
+
+/* Dose message: a full-width banner under the last sync line that fades out by itself */
+.sh-dose-banner {
+    display: none;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0.75rem 0 0;
+    padding: 0.7rem 0.75rem 0.7rem 1rem;
+    border: 1px solid var(--sh-border);
+    border-left: 4px solid var(--sh-green);
+    border-radius: var(--sh-radius-sm);
+    background: var(--sh-surface);
+    color: var(--sh-text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: opacity 0.4s ease;
+}
+
+    .sh-dose-banner.show {
+        display: flex;
+        animation: sh-dose-banner-in 0.25s ease;
+    }
+
+    .sh-dose-banner.fading {
+        opacity: 0;
+    }
+
+    .sh-dose-banner.error {
+        border-color: var(--sh-danger-border);
+        border-left-color: var(--sh-danger);
+        background: var(--sh-danger-soft);
+    }
+
+.sh-dose-banner-icon {
+    flex-shrink: 0;
+    font-size: 22px;
+    color: var(--sh-green);
+}
+
+.sh-dose-banner.error .sh-dose-banner-icon {
+    color: var(--sh-danger);
+}
+
+.sh-dose-banner-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sh-dose-banner-close {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--sh-text-muted);
+    cursor: pointer;
+}
+
+    .sh-dose-banner-close:hover {
+        background: var(--sh-surface-muted);
+        color: var(--sh-text);
+    }
+
+    .sh-dose-banner-close:focus-visible {
+        outline: 3px solid var(--sh-focus-ring);
+        outline-offset: 1px;
+    }
+
+    .sh-dose-banner-close .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+@keyframes sh-dose-banner-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sh-dose-banner,
+    .sh-dose-banner.show {
+        transition: none;
+        animation: none;
+    }
+}

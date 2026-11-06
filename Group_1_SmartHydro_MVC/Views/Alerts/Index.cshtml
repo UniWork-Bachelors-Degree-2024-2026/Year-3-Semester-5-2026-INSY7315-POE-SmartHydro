@@ -1,0 +1,385 @@
+﻿@using Microsoft.AspNetCore.Routing
+@model Group_1_SmartHydro_MVC.Models.AlertsPageViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " Alerts";
+
+    string? clearAllDisabled = null;
+    if (Model.ActiveCount == 0)
+    {
+        clearAllDisabled = "disabled";
+    }
+
+    var resultsWord = "alerts";
+    if (Model.MatchCount == 1)
+    {
+        resultsWord = "alert";
+    }
+
+    var clearModalText = "All " + Model.ActiveCount + " active alerts will be marked as cleared by the operator and moved to Resolved.";
+    if (Model.ActiveCount == 1)
+    {
+        clearModalText = "The active alert will be marked as cleared by the operator and moved to Resolved.";
+    }
+
+    var emptyIcon = "notifications_off";
+    var emptyTitle = "Nothing to show yet";
+    var emptyText = "Alerts from your sensors and devices will appear here.";
+    if (Model.ActiveFilterCount > 0)
+    {
+        emptyIcon = "filter_alt_off";
+        emptyTitle = "No alerts match these filters";
+        emptyText = "Try removing a filter to see more of your alerts.";
+    }
+    else if (Model.Status == AlertStatusFilter.Active)
+    {
+        emptyIcon = "check_circle";
+        emptyTitle = "All clear";
+        emptyText = "There are no active alerts right now.";
+    }
+    else if (Model.Status == AlertStatusFilter.Resolved)
+    {
+        emptyTitle = "No resolved alerts";
+        emptyText = "Alerts you acknowledge or that clear themselves will be listed here.";
+    }
+
+    string BuildUrl(string status, string severity, string location, int take)
+    {
+        var values = new RouteValueDictionary();
+
+        if (status != AlertStatusFilter.All)
+        {
+            values["status"] = status;
+        }
+
+        if (severity.Length > 0)
+        {
+            values["severity"] = severity;
+        }
+
+        if (location.Length > 0)
+        {
+            values["location"] = location;
+        }
+
+        if (take > 0)
+        {
+            values["take"] = take;
+        }
+
+        return Url.Action("Index", "Alerts", values) ?? "#";
+    }
+
+    var tabs = new List<(string Key, string Label, int Count)>
+    {
+        (AlertStatusFilter.All, "All Alerts", Model.TotalCount),
+        (AlertStatusFilter.Active, "Active", Model.ActiveCount),
+        (AlertStatusFilter.Resolved, "Resolved", Model.ResolvedCount)
+    };
+
+    var alertLabel = "Alerts";
+    if (Model.AlertCount == 1)
+    {
+        alertLabel = "Alert";
+    }
+
+    var cautionLabel = "Cautions";
+    if (Model.CautionCount == 1)
+    {
+        cautionLabel = "Caution";
+    }
+
+    var stats = new List<(string Css, string Icon, int Count, string Label, string Caption, string Url)>
+    {
+        ("level-alert", "warning", Model.AlertCount, alertLabel, "Need action now", BuildUrl(AlertStatusFilter.Active, "alert", "", 0)),
+        ("level-caution", "info", Model.CautionCount, cautionLabel, "Worth keeping an eye on", BuildUrl(AlertStatusFilter.Active, "caution", "", 0)),
+        ("level-resolved", "check_circle", Model.ResolvedCount, "Resolved", "Cleared so far", BuildUrl(AlertStatusFilter.Resolved, "", "", 0))
+    };
+}
+
+<div class="sh-al-page">
+    <div class="sh-status-header sh-al-header">
+        <div>
+            <h2 class="sh-status-title">System Alerts</h2>
+            <div class="sh-al-subline">
+                <span class="sh-live-status">
+                    <span class="material-symbols-outlined" aria-hidden="true">wifi</span>
+                    Online
+                </span>
+                <span class="sh-status-subtitle">Last sync: @Model.LastSyncText</span>
+            </div>
+        </div>
+
+        <div class="sh-al-actions">
+            <button type="button" class="sh-al-btn-outline" data-bs-toggle="modal" data-bs-target="#sh-al-clear-modal" disabled="@clearAllDisabled">
+                <span class="material-symbols-outlined" aria-hidden="true">done_all</span>
+                Clear All
+            </button>
+
+            <div class="dropdown">
+                <button type="button" class="sh-al-btn-dark" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+                    Filter
+                    @if (Model.ActiveFilterCount > 0)
+                    {
+                        <span class="sh-al-filter-badge" aria-hidden="true">@Model.ActiveFilterCount</span>
+                        <span class="visually-hidden">(@Model.ActiveFilterCount applied)</span>
+                    }
+                </button>
+
+                <form class="dropdown-menu dropdown-menu-end sh-al-filter-panel" asp-action="Filter" method="get">
+                    <input type="hidden" name="status" value="@Model.Status" />
+
+                    <div class="sh-field">
+                        <label class="sh-field-label" for="sh-al-severity">Severity</label>
+                        <div class="sh-select-wrap">
+                            <select class="sh-input sh-select" id="sh-al-severity" name="severity">
+                                <option value="" selected="@(Model.Severity.Length == 0)">Any severity</option>
+                                <option value="alert" selected="@(Model.Severity == "alert")">Alert</option>
+                                <option value="caution" selected="@(Model.Severity == "caution")">Caution</option>
+                            </select>
+                            <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="sh-field">
+                        <label class="sh-field-label" for="sh-al-location">Location</label>
+                        <div class="sh-select-wrap">
+                            <select class="sh-input sh-select" id="sh-al-location" name="location">
+                                <option value="" selected="@(Model.Location.Length == 0)">All locations</option>
+                                @foreach (var place in Model.Locations)
+                                {
+                                    <option value="@place" selected="@(Model.Location == place)">@place</option>
+                                }
+                            </select>
+                            <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="sh-al-filter-actions">
+                        <a class="sh-al-filter-reset" href="@BuildUrl(Model.Status, "", "", 0)">Reset</a>
+                        <button type="submit" class="sh-al-btn-dark sh-al-btn-compact">Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.LoadFailed)
+    {
+        <div class="sh-flash sh-flash-muted" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+            <span>This site's alerts couldn't be loaded right now. Please refresh the page to try again.</span>
+        </div>
+    }
+
+    @if (TempData["AlertsMessage"] is string alertsMessage)
+    {
+        <div class="sh-flash sh-al-flash" role="status">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <span>@alertsMessage</span>
+        </div>
+    }
+
+    <div class="sh-al-stats">
+        @foreach (var stat in stats)
+        {
+            var statClass = "sh-al-stat " + stat.Css;
+
+            <a class="@statClass" href="@stat.Url">
+                <span class="sh-al-stat-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@stat.Icon</span>
+                </span>
+                <span class="sh-al-stat-body">
+                    <span class="sh-al-stat-count">@stat.Count</span>
+                    <span class="sh-al-stat-label">@stat.Label</span>
+                </span>
+                <span class="sh-al-stat-caption">@stat.Caption</span>
+            </a>
+        }
+    </div>
+
+    <div class="sh-al-toolbar">
+        <nav class="sh-al-tabs" aria-label="Alert status">
+            @foreach (var tab in tabs)
+            {
+                var tabClass = "sh-al-tab";
+                string? tabCurrent = null;
+                if (tab.Key == Model.Status)
+                {
+                    tabClass = "sh-al-tab active";
+                    tabCurrent = "page";
+                }
+
+                <a class="@tabClass" aria-current="@tabCurrent" href="@BuildUrl(tab.Key, Model.Severity, Model.Location, 0)">
+                    <span>@tab.Label</span>
+                    <span class="sh-al-tab-count">@tab.Count</span>
+                </a>
+            }
+        </nav>
+
+        @if (Model.MatchCount > 0)
+        {
+            <span class="sh-al-showing">Showing @Model.Alerts.Count of @Model.MatchCount @resultsWord</span>
+        }
+    </div>
+
+    <div class="sh-card sh-al-card">
+        @if (Model.Alerts.Count == 0)
+        {
+            <div class="sh-al-empty">
+                <span class="sh-al-empty-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">@emptyIcon</span>
+                </span>
+                <h3 class="sh-al-empty-title">@emptyTitle</h3>
+                <p class="sh-al-empty-text">@emptyText</p>
+                @if (Model.ActiveFilterCount > 0)
+                {
+                    <a class="sh-al-btn-outline" href="@BuildUrl(Model.Status, "", "", 0)">Reset filters</a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="sh-al-table-wrap">
+                <table class="sh-al-table">
+                    <caption class="visually-hidden">Alerts</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Sensor / Component</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Value / Threshold</th>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col" class="sh-al-col-action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var alert in Model.Alerts)
+                        {
+                            var rowClass = "sh-al-row " + alert.StatusClass;
+                            var iconClass = "sh-icon-tile sh-icon-stack sh-al-icon " + alert.IconColorClass;
+                            var statusClass = "sh-al-status " + alert.StatusClass;
+                            var valueClass = "sh-al-value " + alert.StatusClass;
+
+                            <tr class="@rowClass">
+                                <td data-label="Sensor / Component">
+                                    <div class="sh-al-comp">
+                                        <span class="@iconClass" aria-hidden="true">
+                                            @if (alert.IconIsMaterialSymbol)
+                                            {
+                                                <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@alert.IconName</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="@alert.IconName"></i>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(alert.IconText))
+                                            {
+                                                <span class="sh-icon-stack-text">@alert.IconText</span>
+                                            }
+                                        </span>
+                                        <div class="sh-al-comp-text">
+                                            <div class="sh-al-comp-name">@alert.Component</div>
+                                            <div class="sh-al-comp-loc">
+                                                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                                                @alert.Location
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td data-label="Status">
+                                    <span class="@statusClass">
+                                        <span class="material-symbols-outlined sh-icon-filled" aria-hidden="true">@alert.StatusIcon</span>
+                                        @alert.StatusLabel
+                                    </span>
+                                </td>
+
+                                <td data-label="Value / Threshold">
+                                    <div class="sh-al-value-block">
+                                        <div class="@valueClass">@alert.Value</div>
+                                        @if (!string.IsNullOrWhiteSpace(alert.Detail))
+                                        {
+                                            <div class="sh-al-detail">@alert.Detail</div>
+                                        }
+                                    </div>
+                                </td>
+
+                                <td data-label="Timestamp">
+                                    <div class="sh-al-time">
+                                        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                                        <div>
+                                            <div class="sh-al-time-main">@alert.TimeText</div>
+                                            <div class="sh-al-time-day">@alert.DayText</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td data-label="Action" class="sh-al-col-action">
+                                    @if (alert.IsResolved)
+                                    {
+                                        <span class="sh-al-cleared">
+                                            <span class="material-symbols-outlined" aria-hidden="true">task_alt</span>
+                                            Cleared by @alert.ClearedBy
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Acknowledge" method="post" class="sh-al-ack-form">
+                                            <input type="hidden" name="id" value="@alert.Id" />
+                                            <input type="hidden" name="status" value="@Model.Status" />
+                                            <input type="hidden" name="severity" value="@Model.Severity" />
+                                            <input type="hidden" name="location" value="@Model.Location" />
+                                            <input type="hidden" name="take" value="@Model.Take" />
+                                            <button type="submit" class="sh-al-btn" aria-label="Acknowledge alert for @alert.Component at @alert.Location">
+                                                <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                                                Acknowledge
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    @if (Model.HasMore)
+    {
+        <div class="sh-al-more-wrap">
+            <a class="sh-al-btn-outline sh-al-more" href="@BuildUrl(Model.Status, Model.Severity, Model.Location, Model.NextTake)">
+                Load More Alerts
+                <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="modal fade sh-al-modal" id="sh-al-clear-modal" tabindex="-1" aria-labelledby="sh-al-clear-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center px-4 py-5">
+                <span class="sh-al-modal-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">done_all</span>
+                </span>
+                <h2 class="sh-al-modal-title" id="sh-al-clear-title">Clear all active alerts?</h2>
+                <p class="sh-al-modal-text">@clearModalText</p>
+
+                <form asp-action="ClearAll" method="post" class="sh-al-modal-actions">
+                    <input type="hidden" name="status" value="@Model.Status" />
+                    <input type="hidden" name="severity" value="@Model.Severity" />
+                    <input type="hidden" name="location" value="@Model.Location" />
+                    <input type="hidden" name="take" value="@Model.Take" />
+                    <button type="button" class="sh-al-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="sh-al-btn-dark">Clear All</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/alerts.css" asp-append-version="true" />
+}

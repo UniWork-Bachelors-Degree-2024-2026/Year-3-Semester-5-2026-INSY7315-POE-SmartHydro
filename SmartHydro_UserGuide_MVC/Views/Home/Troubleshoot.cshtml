@@ -1,0 +1,219 @@
+@using Microsoft.AspNetCore.Html
+@model HelpPageViewModel
+@{
+    var siteRoot = Url.Content("~/");
+
+    // Turns the "~/" links written in the guide content into real links for wherever the site is hosted.
+    IHtmlContent Rich(string html)
+    {
+        return Html.Raw(html.Replace("href='~/", "href='" + siteRoot));
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/guide.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/troubleshoot.css" asp-append-version="true" />
+}
+
+<div class="sh-guide-stack">
+    <partial name="_PageIntro" model="Model" />
+
+    <nav class="sh-card sh-ts-jump" aria-label="On this page">
+        <p class="sh-jump-title">On this page</p>
+        <ul>
+            <li><a href="#sh-quick">Check these first</a></li>
+            <li><a href="#sh-troubleshooter">Find the fix</a></li>
+            <li><a href="#sh-messages">Messages you might see</a></li>
+            <li><a href="#sh-faq">Common questions</a></li>
+            <li><a href="#sh-help">Still stuck?</a></li>
+        </ul>
+    </nav>
+
+    <section class="sh-card" id="sh-quick" aria-labelledby="sh-quick-title">
+        <div class="sh-task-head">
+            <span class="sh-task-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">checklist</span>
+            </span>
+            <div class="sh-task-heading">
+                <h3 class="sh-task-title" id="sh-quick-title">Check these first</h3>
+                <p class="sh-task-why">These quick checks fix most problems.</p>
+            </div>
+        </div>
+
+        <div class="sh-ts-checks">
+            @foreach (var check in Model.QuickChecks)
+            {
+                <div class="@check.GetCssClass()">
+                    <span class="material-symbols-outlined" aria-hidden="true">@check.GetIcon()</span>
+                    <div>@Rich(check.Html)</div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="sh-card sh-ts" id="sh-troubleshooter" aria-labelledby="sh-ts-title" data-troubleshooter>
+        <div class="sh-task-head">
+            <span class="sh-task-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">troubleshoot</span>
+            </span>
+            <div class="sh-task-heading">
+                <h3 class="sh-task-title" id="sh-ts-title">Find the fix</h3>
+                <p class="sh-task-why">Tap the answer that fits you best. We will ask one or two more questions, then show you what to try.</p>
+            </div>
+        </div>
+
+        <p class="sh-ts-trail" id="sh-ts-trail" aria-live="polite"></p>
+
+        @foreach (var question in Model.Questions)
+        {
+            <div class="sh-ts-panel" id="@question.GetPanelId()" data-step="@question.Id">
+                <h4 class="sh-ts-ask" tabindex="-1">@question.Text</h4>
+                <div class="sh-ts-answers">
+                    @foreach (var answer in question.Answers)
+                    {
+                        <a class="sh-ts-answer" href="#@answer.GetTargetPanelId()" data-next="@answer.Next" data-label="@answer.Label">
+                            <span class="material-symbols-outlined" aria-hidden="true">@answer.Icon</span>
+                            <span>@answer.Label</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @foreach (var fix in Model.Fixes)
+        {
+            <div class="sh-ts-panel" id="@fix.GetPanelId()" data-step="@fix.Id">
+                <p class="sh-ts-try">Try this</p>
+                <div class="sh-ts-fix">
+                    <h4 class="sh-ts-ask" tabindex="-1">
+                        <span class="material-symbols-outlined" aria-hidden="true">lightbulb</span>
+                        @fix.Title
+                    </h4>
+                    <ol class="sh-ts-fix-steps">
+                        @foreach (var step in fix.Steps)
+                        {
+                            <li>@Rich(step)</li>
+                        }
+                    </ol>
+                    @if (fix.HasLink())
+                    {
+                        <a class="sh-btn sh-ts-showme" href="@Url.Content(fix.LinkHref)">
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                            Show me how: @fix.LinkLabel
+                        </a>
+                    }
+                </div>
+                <p class="sh-ts-still">Still not working? Go back and pick another answer, or see <a href="#sh-help">Still stuck?</a></p>
+            </div>
+        }
+
+        <div class="sh-task-actions sh-ts-actions">
+            <button class="sh-btn" type="button" id="sh-ts-back" hidden>
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                Back
+            </button>
+            <button class="sh-btn" type="button" id="sh-ts-restart" hidden>
+                <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+                Start again
+            </button>
+        </div>
+    </section>
+
+    @if (Model.Messages != null)
+    {
+        <section class="sh-card" id="sh-messages" aria-labelledby="sh-messages-title">
+            <div class="sh-task-head">
+                <span class="sh-task-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">sms_failed</span>
+                </span>
+                <div class="sh-task-heading">
+                    <h3 class="sh-task-title" id="sh-messages-title">Messages you might see</h3>
+                    <p class="sh-task-why">What the words on the screen mean, and what to do next.</p>
+                </div>
+            </div>
+
+            <div class="sh-table-scroll">
+                <table class="sh-table sh-ts-messages">
+                    <thead>
+                        <tr>
+                            @foreach (var header in Model.Messages.Headers)
+                            {
+                                <th scope="col">@header</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Messages.Rows)
+                        {
+                            <tr>
+                                @for (var i = 0; i < row.Count; i++)
+                                {
+                                    if (i == 0)
+                                    {
+                                        <th scope="row"><b>@row[i]</b></th>
+                                    }
+                                    else
+                                    {
+                                        <td>@row[i]</td>
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    <section class="sh-card" id="sh-faq" aria-labelledby="sh-faq-title">
+        <div class="sh-task-head">
+            <span class="sh-task-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">quiz</span>
+            </span>
+            <div class="sh-task-heading">
+                <h3 class="sh-task-title" id="sh-faq-title">Common questions</h3>
+                <p class="sh-task-why">Tap a question to see the answer.</p>
+            </div>
+        </div>
+
+        @foreach (var group in Model.FaqGroups)
+        {
+            <div class="sh-ts-faq-group" id="@group.Id">
+                <h4 class="sh-ts-faq-title">
+                    <span class="material-symbols-outlined" aria-hidden="true">@group.Icon</span>
+                    @group.Title
+                </h4>
+                @foreach (var item in group.Items)
+                {
+                    <details class="sh-ts-faq">
+                        <summary>@item.Question</summary>
+                        <p>@Rich(item.AnswerHtml)</p>
+                    </details>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="sh-card" id="sh-help" aria-labelledby="sh-help-title">
+        <div class="sh-task-head">
+            <span class="sh-task-icon" aria-hidden="true">
+                <span class="material-symbols-outlined">support_agent</span>
+            </span>
+            <div class="sh-task-heading">
+                <h3 class="sh-task-title" id="sh-help-title">Still stuck?</h3>
+                <p class="sh-task-why">We are happy to help.</p>
+            </div>
+        </div>
+        <p class="sh-task-para">Email <a class="sh-mono" href="mailto:smarthydrosupport@gmail.com">smarthydrosupport@gmail.com</a>. Please tell us:</p>
+        <ul class="sh-ts-tell">
+            <li>The code on the sticker on your box, like <b class="sh-mono">A4:CF:12:9B:3E:01</b></li>
+            <li>What the top of the box screen says</li>
+            <li>What you tried from this page</li>
+            <li>A photo of any message you see</li>
+        </ul>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/troubleshoot.js" asp-append-version="true"></script>
+}

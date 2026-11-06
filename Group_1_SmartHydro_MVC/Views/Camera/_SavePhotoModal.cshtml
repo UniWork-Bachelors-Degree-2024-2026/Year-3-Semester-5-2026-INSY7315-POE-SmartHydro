@@ -1,0 +1,67 @@
+﻿@model List<string>
+<div class="modal fade sh-add-modal sh-save-modal" id="sh-save-modal" tabindex="-1" aria-labelledby="sh-save-title" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="sh-modal-heading">
+                    <span class="sh-modal-icon" aria-hidden="true"><span class="material-symbols-outlined">photo_camera</span></span>
+                    <div class="sh-modal-heading-text">
+                        <h2 class="modal-title" id="sh-save-title">Save this photo</h2>
+                        <p class="sh-modal-sub" id="sh-save-sub">Add a few details before it goes into the gallery.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Discard photo and close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="sh-save-form" novalidate>
+                    <div class="sh-capture-preview">
+                        <img class="sh-capture-preview-img" id="sh-save-preview" alt="Preview of the photo you just took" />
+                    </div>
+
+                    <div class="sh-add-fields">
+                        <div class="sh-add-field-full">
+                            <label class="sh-add-label" for="sh-save-date-trigger">Date taken</label>
+                            <div class="sh-date-field" id="sh-save-date-field" data-placeholder="Select a date">
+                                <input type="hidden" id="sh-save-date" name="takenAt" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-save-structure">Structure</label>
+                            <select class="form-select" id="sh-save-structure" name="structure">
+                                <option value="">Choose a structure</option>
+                                @foreach (var structureName in Model)
+                                {
+                                    <option value="@structureName">@structureName</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="sh-add-label" for="sh-save-plant">Plant <span>(optional)</span></label>
+                            <input type="text" class="form-control" id="sh-save-plant" name="plant" maxlength="60" autocomplete="off" />
+                        </div>
+                        <div class="sh-add-field-full">
+                            <label class="sh-fav-check" for="sh-save-favourite">
+                                <input type="checkbox" class="visually-hidden" id="sh-save-favourite" name="favourite" value="true" />
+                                <span class="sh-fav-check-icon" aria-hidden="true">
+                                    <span class="material-symbols-outlined">star</span>
+                                </span>
+                                <span class="sh-fav-check-text">
+                                    <span class="sh-fav-check-title">Add to favorites</span>
+                                    <span class="sh-fav-check-hint">Find it quickly with the Favorites filter</span>
+                                </span>
+                                <span class="sh-switch" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="sh-add-error" id="sh-save-error" role="alert" hidden></p>
+
+                    <div class="sh-save-actions sh-modal-actions">
+                        <button type="button" class="sh-btn-outline" id="sh-save-retake" data-bs-dismiss="modal">Retake</button>
+                        <button type="submit" class="sh-gallery-btn" id="sh-save-submit">Save photo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

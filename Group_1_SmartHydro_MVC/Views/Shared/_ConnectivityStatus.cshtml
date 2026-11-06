@@ -1,0 +1,13 @@
+@model string
+
+<section class="sh-mode-status" data-mode-state-url="@Model" aria-label="Controller connection">
+    <span class="sh-mode-status-icon material-symbols-outlined" aria-hidden="true">sensors</span>
+    <div class="sh-mode-status-content">
+        <span class="sh-mode-status-label">Controller connection</span>
+        <div class="sh-mode-status-active" data-mode-active role="status" aria-live="polite">Connection: waiting for the controller to report.</div>
+        <div class="sh-mode-status-link" data-mode-link aria-live="off"></div>
+        <div class="sh-mode-status-pending" data-mode-pending aria-live="off"></div>
+        <span class="visually-hidden" data-mode-announcement role="status" aria-live="polite"></span>
+        <div class="sh-mode-status-warning" data-mode-warning role="status" aria-live="polite"></div>
+    </div>
+</section>

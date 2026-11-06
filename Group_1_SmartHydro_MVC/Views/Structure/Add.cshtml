@@ -1,0 +1,218 @@
+﻿@model Group_1_SmartHydro_MVC.Models.AddStructureViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " Site";
+
+    var isEdit = Model.IsEdit;
+    var isFodder = Model.Type == StructureType.Fodder;
+
+    var badgeText = "Hydroponic";
+    if (isFodder)
+    {
+        badgeText = "Fodder";
+    }
+
+    var formAction = "Add";
+    var formMode = "add";
+    var submitText = "Add a Structure";
+    var resetText = "Clear the form";
+    var resetIcon = "delete";
+    var previewCaption = "The card updates as you complete the form.";
+    var confirmText = "Yes, clear";
+    var dateText = "Set automatically";
+    if (isEdit)
+    {
+        dateText = "Created on";
+        formAction = "Edit";
+        formMode = "edit";
+        submitText = "Save Changes";
+        resetText = "Discard changes";
+        resetIcon = "undo";
+        previewCaption = "The card updates as you edit the form.";
+        confirmText = "Yes, discard";
+    }
+
+    var previewName = "New Structure";
+    if (!string.IsNullOrWhiteSpace(Model.Name))
+    {
+        previewName = Model.Name.Trim();
+    }
+
+    var previewMac = "No MAC address yet";
+    var previewMacClass = "sh-mac-text is-empty";
+    if (!string.IsNullOrWhiteSpace(Model.MacAddress))
+    {
+        previewMac = Model.MacAddress.Trim().ToUpperInvariant();
+        previewMacClass = "sh-mac-text";
+    }
+
+    var previewCamera = "";
+    if (!string.IsNullOrWhiteSpace(Model.CameraMac))
+    {
+        previewCamera = Model.CameraMac.Trim().ToUpperInvariant();
+    }
+
+    var labelKey = StructureLabelColours.Default;
+    if (StructureLabelColours.IsValid(Model.LabelColour))
+    {
+        labelKey = Model.LabelColour!;
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/clear-modal.css" asp-append-version="true" />
+}
+
+<div class="sh-status-header">
+    <div>
+        @if (isEdit)
+        {
+            <h2 class="sh-status-title">Edit Structure</h2>
+            <span class="sh-status-subtitle">Change the details below, then save.</span>
+        }
+        else
+        {
+            <h2 class="sh-status-title">Add a Structure</h2>
+            <span class="sh-status-subtitle">Fill in the details below to add a new structure.</span>
+        }
+    </div>
+    <a class="sh-back-btn-solid" asp-controller="Structure" asp-action="Index">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        Back
+    </a>
+</div>
+
+<div class="sh-add-layout">
+    <form class="sh-card sh-add-form" id="sh-add-structure-form" asp-controller="Structure" asp-action="@formAction" asp-route-id="@Model.Id" method="post"
+          data-mode="@formMode">
+        <div asp-validation-summary="ModelOnly" class="sh-field-error"></div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" for="MacAddress">Controller MAC Address</label>
+            <input asp-for="MacAddress" class="sh-input sh-input-mac" placeholder="e.g. A4:CF:12:9B:3E:01" maxlength="17"
+                   autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="sh-mac-hint" />
+            <span class="sh-field-hint" id="sh-mac-hint">The ID printed on the controller box. We add the colons for you.</span>
+            <span asp-validation-for="MacAddress" class="sh-field-error"></span>
+        </div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" for="CameraMac">Camera MAC Address <span class="sh-field-optional">(optional)</span></label>
+            <input asp-for="CameraMac" class="sh-input sh-input-mac" placeholder="e.g. A4:CF:12:9B:3E:02" maxlength="17"
+                   autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="sh-camera-hint" />
+            <span class="sh-field-hint" id="sh-camera-hint">The ID of the camera, if this structure has one. Leave empty if not.</span>
+            <span asp-validation-for="CameraMac" class="sh-field-error"></span>
+        </div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" for="Name">Structure Name</label>
+            <input asp-for="Name" class="sh-input" placeholder="e.g. EMERIS NMB Fodder Structure" maxlength="60" autocomplete="off" />
+            <span asp-validation-for="Name" class="sh-field-error"></span>
+        </div>
+
+        <div class="sh-field">
+            <label class="sh-field-label" for="Type">Structure Type</label>
+            <div class="sh-select-wrap">
+                <select asp-for="Type" class="sh-input sh-select">
+                    <option value="Hydroponic" data-badge="Hydroponic">Hydroponic Structure</option>
+                    <option value="Fodder" data-badge="Fodder">Fodder Structure</option>
+                </select>
+                <span class="material-symbols-outlined sh-select-icon" aria-hidden="true">expand_more</span>
+            </div>
+            <span asp-validation-for="Type" class="sh-field-error"></span>
+        </div>
+
+        @if (!isEdit || Model.CreatedAt.HasValue)
+        {
+            <div class="sh-field">
+                <span class="sh-field-label" id="sh-date-label">Date</span>
+                <div class="sh-auto-date" aria-labelledby="sh-date-label">
+                    <span>@dateText</span>
+                    <strong>@Model.CreatedOn</strong>
+                </div>
+            </div>
+        }
+
+        <fieldset class="sh-field sh-field-set">
+            <legend class="sh-field-label">Label Colour</legend>
+            <div class="sh-swatches">
+                @foreach (var colour in StructureLabelColours.All)
+                {
+                    <label class="sh-swatch" title="@colour.Name">
+                        <input type="radio" name="LabelColour" value="@colour.Key" checked="@(colour.Key == labelKey)" />
+                        <span class="sh-swatch-dot sh-label-@colour.Key">
+                            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                        </span>
+                        <span class="visually-hidden">@colour.Name</span>
+                    </label>
+                }
+            </div>
+            <span asp-validation-for="LabelColour" class="sh-field-error"></span>
+        </fieldset>
+
+        <button type="submit" class="sh-submit-btn">@submitText</button>
+    </form>
+
+    <aside class="sh-card sh-add-preview" aria-label="Preview">
+        <h3 class="sh-preview-heading">Preview</h3>
+
+        <div class="sh-preview-card">
+            <span class="sh-structure-icon sh-label-@labelKey" id="sh-preview-tile" aria-hidden="true">
+                <span class="material-symbols-outlined" id="sh-preview-icon-hydroponic" hidden="@isFodder" aria-hidden="true">eco</span>
+                <i class="fa-solid fa-seedling" id="sh-preview-icon-fodder" hidden="@(!isFodder)"></i>
+            </span>
+
+            <div class="sh-preview-body">
+                <div class="sh-preview-title-row">
+                    <span class="sh-preview-name" id="sh-preview-name">@previewName</span>
+                    <span class="sh-badge" id="sh-preview-badge">@badgeText</span>
+                </div>
+                <div class="sh-preview-location">
+                    <span class="material-symbols-outlined" aria-hidden="true">memory</span>
+                    <span id="sh-preview-mac" class="@previewMacClass">@previewMac</span>
+                </div>
+                <div class="sh-preview-location" id="sh-preview-camera-row" hidden="@string.IsNullOrEmpty(previewCamera)">
+                    <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+                    <span id="sh-preview-camera" class="sh-mac-text">@previewCamera</span>
+                </div>
+            </div>
+
+            <button type="button" class="sh-structure-delete" id="sh-preview-reset"
+                    title="@resetText" aria-label="@resetText">
+                <span class="material-symbols-outlined" aria-hidden="true">@resetIcon</span>
+            </button>
+        </div>
+
+        <p class="sh-preview-caption">@previewCaption</p>
+    </aside>
+</div>
+
+<div class="modal fade sh-clear-modal" id="sh-clear-modal" tabindex="-1" role="alertdialog" aria-labelledby="sh-clear-title" aria-describedby="sh-clear-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="sh-clear-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">@resetIcon</span>
+                </span>
+                @if (isEdit)
+                {
+                    <h2 class="sh-clear-title" id="sh-clear-title">Discard changes?</h2>
+                    <p class="sh-clear-text" id="sh-clear-text">Are you sure you want to discard your changes? The form will go back to the details that are currently saved.</p>
+                }
+                else
+                {
+                    <h2 class="sh-clear-title" id="sh-clear-title">Clear form data?</h2>
+                    <p class="sh-clear-text" id="sh-clear-text">Are you sure you want to clear the data? Everything you have entered will be reset.</p>
+                }
+                <div class="sh-clear-buttons">
+                    <button type="button" class="sh-clear-cancel" id="sh-clear-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="sh-clear-confirm" id="sh-clear-confirm">@confirmText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/structure-add.js" asp-append-version="true"></script>
+}

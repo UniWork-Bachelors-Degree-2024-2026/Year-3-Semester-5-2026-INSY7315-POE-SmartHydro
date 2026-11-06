@@ -1,0 +1,116 @@
+﻿@model Group_1_SmartHydro_MVC.Models.VerifyEmailViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Verify Your Email";
+
+    string? formError = null;
+    if (ViewData.ModelState.TryGetValue(string.Empty, out var formState))
+    {
+        formError = formState.Errors.Select(e => e.ErrorMessage).FirstOrDefault();
+    }
+
+    if (formError == null && ViewData.ModelState.TryGetValue(nameof(Model.Code), out var codeState))
+    {
+        formError = codeState.Errors.Select(e => e.ErrorMessage).FirstOrDefault();
+    }
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Smart Hydro</title>
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/busy-submit.js" asp-append-version="true" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reader.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth-modals.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/verify-email.css" asp-append-version="true" />
+</head>
+<body class="sh-auth-body">
+    <main class="sh-auth-main">
+        <div class="sh-auth-center">
+            <div class="sh-auth-center-stack">
+                <div class="sh-card sh-auth-card sh-verify-card">
+                    <button class="sh-theme-toggle sh-contrast-toggle sh-auth-theme-toggle sh-auth-contrast-toggle" type="button" id="sh-contrast-toggle" aria-pressed="false" aria-label="Turn on high contrast" title="Turn on high contrast">
+                        <span class="material-symbols-outlined" aria-hidden="true">contrast</span>
+                    </button>
+                    <button class="sh-theme-toggle sh-auth-theme-toggle" type="button" id="sh-theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                        <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-light" aria-hidden="true">light_mode</span>
+                        <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-dark" aria-hidden="true">dark_mode</span>
+                    </button>
+                    <partial name="_AuthReaderButtons" />
+
+                    <div class="sh-verify-head">
+                        <span class="sh-verify-icon" aria-hidden="true">
+                            <span class="material-symbols-outlined">mark_email_read</span>
+                        </span>
+                        <h1 class="sh-verify-title">Verify your email</h1>
+                        <p class="sh-verify-lead">Enter the 6-digit code we sent to</p>
+                        <span class="sh-verify-email">@Model.Email</span>
+                    </div>
+
+                    <form class="sh-verify-form" id="sh-verify-form" asp-controller="Account" asp-action="VerifyEmail" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Code" type="hidden" id="Code" />
+
+                        <div class="sh-otp-boxes" id="sh-otp-boxes" role="group" aria-label="Verification code">
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2" />
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3" />
+                            <span class="sh-otp-sep" aria-hidden="true"></span>
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4" />
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 5" />
+                            <input class="sh-otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 6" />
+                        </div>
+
+                        @if (formError != null)
+                        {
+                            <div class="sh-modal-error" role="alert">
+                                <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                                <span>@formError</span>
+                            </div>
+                        }
+
+                        <button type="submit" class="sh-submit-btn sh-auth-submit" id="sh-otp-verify" disabled>Verify Email</button>
+                    </form>
+
+                    <form class="sh-verify-cancel" asp-controller="Account" asp-action="CancelRegistration" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="sh-modal-btn sh-modal-btn-secondary sh-verify-cancel-btn">Cancel</button>
+                    </form>
+
+                    <div class="sh-verify-meta">
+                        <p>
+                            Didn't get it?
+                            <button type="button" class="sh-link-button" id="sh-otp-resend" data-resend-url="@Url.Action("ResendRegistrationCode", "Account")">Resend code</button>
+                        </p>
+                        <p class="sh-verify-status" id="sh-otp-resend-status" role="status" aria-live="polite"></p>
+                        <p>Expires in 10 minutes. Check your spam folder</p>
+                    </div>
+
+                    <p class="sh-verify-note">
+                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        <span>Once your email is verified, your registration is sent to an administrator for review. Already have an account? Cancel and sign in instead.</span>
+                    </p>
+
+                    <div class="sh-auth-divider">or</div>
+                    <p class="sh-auth-footer-note sh-verify-footer">
+                        Wrong email? <a asp-controller="Account" asp-action="Register">Start again</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sh-auth-page-foot">&copy; @DateTime.Now.Year Smart Hydro</div>
+    </main>
+
+    <script src="~/js/register-verify.js" asp-append-version="true"></script>
+    <script src="~/js/reader.js" asp-append-version="true"></script>
+</body>
+</html>

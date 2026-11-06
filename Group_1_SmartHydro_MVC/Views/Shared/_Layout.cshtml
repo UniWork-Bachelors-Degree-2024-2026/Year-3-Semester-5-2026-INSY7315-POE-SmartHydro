@@ -1,0 +1,102 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    var layoutSite = await SiteContext.GetCurrentAsync();
+    var layoutSiteId = "";
+    if (layoutSite != null)
+    {
+        layoutSiteId = layoutSite.Id;
+    }
+
+    var liveRefresh = "false";
+    if (ViewData["LiveRefresh"] is bool refreshOnChange && refreshOnChange)
+    {
+        liveRefresh = "true";
+    }
+
+    var watchAll = "false";
+    if (User.IsInRole("Admin") && string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        watchAll = "true";
+    }
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Smart Hydro</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/busy-submit.js" asp-append-version="true" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reader.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/sensor-detail.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site-switcher.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/select-structure-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/clear-modal.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Group_1_SmartHydro_MVC.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body data-site-id="@layoutSiteId" data-user-email="@User.GetEmail()" data-live-refresh="@liveRefresh" data-watch-all="@watchAll" data-hub-url="@Url.Content("~/hubs/site-updates")" data-api-base-url="@(Configuration["Api:BaseUrl"] ?? "")">
+    <div class="sh-app">
+        <partial name="_Sidebar" />
+        <div class="sh-backdrop" id="sh-backdrop" aria-hidden="true"></div>
+
+        <div class="sh-main">
+            <header class="sh-topbar">
+                <button class="sh-menu-btn" type="button" id="sh-menu-toggle" aria-label="Open menu" aria-controls="sh-sidebar" aria-expanded="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+                </button>
+                <h1 class="sh-page-title">@ViewData["Title"]</h1>
+                <button class="sh-theme-toggle sh-contrast-toggle" type="button" id="sh-contrast-toggle" aria-pressed="false" aria-label="Turn on high contrast" title="Turn on high contrast">
+                    <span class="material-symbols-outlined" aria-hidden="true">contrast</span>
+                </button>
+                <button class="sh-theme-toggle" type="button" id="sh-theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                    <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-light" aria-hidden="true">light_mode</span>
+                    <span class="material-symbols-outlined sh-theme-icon sh-theme-icon-dark" aria-hidden="true">dark_mode</span>
+                </button>
+                <button class="sh-theme-toggle sh-reader-btn sh-reader-toggle" type="button" id="sh-reader-toggle" aria-pressed="false" aria-label="Turn on read aloud" title="Turn on read aloud">
+                    <span class="material-symbols-outlined" aria-hidden="true">record_voice_over</span>
+                </button>
+                <button class="sh-theme-toggle sh-reader-btn" type="button" id="sh-reader-read" aria-label="Read this page aloud" title="Read this page aloud" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">volume_up</span>
+                </button>
+            </header>
+
+            <main class="sh-content" id="sh-main-content" tabindex="-1">
+                @if (Context.Request.Query["denied"] == "1")
+                {
+                    <div class="sh-flash sh-flash-muted" role="alert" style="margin-bottom: 1rem;">
+                        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                        <span>You don't have access to that page.</span>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <partial name="_SiteModals" />
+    <partial name="_ReadingsLockedModal" />
+    <partial name="_LogoutModal" />
+
+    <div id="sh-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/mode-state.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site-switcher.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft-signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/site-updates.js" asp-append-version="true"></script>
+    <script src="~/js/reader.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

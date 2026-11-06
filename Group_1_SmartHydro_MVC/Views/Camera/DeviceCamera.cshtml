@@ -1,0 +1,122 @@
+@model Group_1_SmartHydro_MVC.Models.CameraPageViewModel
+
+@{
+    ViewData["Title"] = await SiteContext.GetDisplayNameAsync() + " ESP32-CAM Inspection";
+    var hasPhoto = !string.IsNullOrEmpty(Model.LatestPhotoUrl);
+    var cameraTitle = string.IsNullOrWhiteSpace(Model.CameraStructure) ? "ESP32-CAM" : Model.CameraStructure + " camera";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/camera.css" asp-append-version="true" />
+}
+
+<div class="sh-live sh-cam-page" id="sh-live"
+     data-source="device"
+     data-trigger-url="@Url.Action("TriggerEspCapture", "Camera")"
+     data-latest-url="@Url.Action("DeviceCameraLatestPhoto", "Camera")"
+     data-by-date-url="@Url.Action("DeviceCameraPhotosByDate", "Camera")"
+     data-gallery-url="@Url.Action("Index", "Camera")"
+     data-target-mac="@Model.TargetMac"
+     data-structure-id="@Model.CameraStructureId">
+    @Html.AntiForgeryToken()
+
+    <div class="sh-cam-topbar">
+        <a class="sh-pill-btn" asp-controller="Camera" asp-action="Index">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Back to Gallery
+        </a>
+    </div>
+
+    <section class="sh-gallery-panel sh-cam-panel" aria-labelledby="sh-cam-title">
+        <div class="sh-gallery-panel-head">
+            <div>
+                <h2 class="sh-gallery-title" id="sh-cam-title">@cameraTitle</h2>
+                <p class="sh-gallery-sub">Take a photo with the ESP32-CAM. It takes a few seconds to come through.</p>
+            </div>
+            <button type="button" class="sh-pill-btn" id="sh-refresh-btn">
+                <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                Refresh
+            </button>
+        </div>
+
+        <div class="sh-live-stage" id="sh-live-stage" data-state="@(hasPhoto ? "live" : "connecting")">
+            <img class="sh-live-video" id="sh-device-image"
+                 src="@(Model.LatestPhotoUrl ?? "")"
+                 alt="Latest photo from the ESP32-CAM"
+                 @(hasPhoto ? "" : "hidden") />
+
+            <canvas id="sh-live-canvas" hidden></canvas>
+
+            <span class="sh-live-badge" id="sh-live-badge">
+                <span class="sh-live-dot" aria-hidden="true"></span>
+                <span id="sh-live-badge-text">@(hasPhoto ? "ONLINE" : "READY")</span>
+            </span>
+
+            <div class="sh-live-info">
+                <div class="sh-live-code" id="sh-live-code">@Model.CameraLabel</div>
+                <div class="sh-live-time" id="sh-live-clock">@(Model.LatestPhotoTakenAt?.ToString("MMM d, yyyy - hh:mm:ss tt") ?? "No photo taken yet")</div>
+            </div>
+
+            <div class="sh-live-sensors" id="sh-live-sensors">
+                <span class="sh-live-sensor-dot @(Model.SensorsOnline ? "is-online" : "")" aria-hidden="true"></span>
+                <span id="sh-sensor-text">@Model.SensorSummary</span>
+            </div>
+
+            <div class="sh-live-message" id="sh-live-message" role="status" @(hasPhoto ? "hidden" : "")>
+                <span class="material-symbols-outlined" aria-hidden="true" id="sh-live-message-icon">photo_camera</span>
+                <p id="sh-live-message-text">@(hasPhoto ? "" : "No photos yet. Press the shutter to take one.")</p>
+                <button type="button" class="sh-gallery-btn sh-live-retry" id="sh-live-retry" hidden>Try again</button>
+            </div>
+
+            <button type="button" class="sh-shutter" id="sh-shutter" aria-label="Take a photo" title="Take photo">
+                <span aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div class="sh-cam-controls">
+            <label class="sh-fav-check sh-cam-flash" for="sh-flash-toggle">
+                <input type="checkbox" class="visually-hidden" id="sh-flash-toggle" />
+                <span class="sh-fav-check-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">bolt</span>
+                </span>
+                <span class="sh-fav-check-text">
+                    <span class="sh-fav-check-title">Flash</span>
+                    <span class="sh-fav-check-hint">Turns on the camera's light for the next photo</span>
+                </span>
+                <span class="sh-switch" aria-hidden="true"></span>
+            </label>
+            <button type="button" class="sh-gallery-btn" id="sh-snap-now-btn">
+                <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+                <span id="sh-snap-now-text">Take photo</span>
+            </button>
+        </div>
+    </section>
+
+    <section class="sh-gallery-panel sh-cam-panel" aria-labelledby="sh-history-title">
+        <div class="sh-gallery-panel-head">
+            <div>
+                <h2 class="sh-gallery-title" id="sh-history-title">Photos by date</h2>
+                <p class="sh-gallery-sub">Pick a day to see its photos. Click one to show it above.</p>
+            </div>
+        </div>
+
+        <label class="visually-hidden" for="sh-history-date-input-trigger">Date</label>
+        <div class="sh-date-field sh-cam-date" id="sh-history-date-field" data-placeholder="Select a date">
+            <input type="hidden" id="sh-history-date-input" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="sh-cam-history" id="sh-history-gallery">
+            <p class="sh-cam-history-note">Pick a date to see its photos.</p>
+        </div>
+    </section>
+</div>
+
+<partial name="_SavePhotoModal" model="Model.Structures" />
+<partial name="_CameraToast" />
+
+@section Scripts {
+    <script src="~/lib/microsoft-signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/js/date-field.js" asp-append-version="true"></script>
+    <script src="~/js/camera-save.js" asp-append-version="true"></script>
+    <script src="~/js/device-camera.js" asp-append-version="true"></script>
+}
